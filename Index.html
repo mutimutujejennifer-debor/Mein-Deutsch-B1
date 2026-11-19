@@ -1,1 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#ffffff">
+<title>Mein-Deutsch-B1</title>
 
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #f7f8fa;
+  color: #20252d;
+  padding-bottom: 90px;
+}
+
+header {
+  background: white;
+  padding: 24px 20px 18px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.logo {
+  font-size: 13px;
+  color: #777;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 27px;
+  margin-top: 12px;
+}
+
+.subtitle {
+  color: #777;
+  font-size: 14px;
+  margin-top: 7px;
+}
+
+main {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+}
+
+.welcome {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 18px;
+  padding: 22px;
+  margin-bottom: 22px;
+}
+
+.welcome p {
+  color: #777;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.section-title {
+  font-size: 18px;
+  margin-bottom: 14px;
+}
+
+.progress-card {
+  background: white;
+  padding: 19px;
+  border-radius: 16px;
+  border: 1px solid #eee;
+  margin-bottom: 24px;
+}
+
+.progress-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.track {
+  background: #eeeeee;
+  height: 9px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  width: 0%;
+  background: #31866a;
+  transition: width .3s;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.lesson {
+  background: white;
+  border: 1px solid #eeeeee;
+  border-radius: 15px;
+  padding: 18px 14px;
+  text-align: left;
+  cursor: pointer;
+  color: #20252d;
+}
+
+.lesson:active {
+  background: #f0f5f2;
+}
+
+.emoji {
+  font-size: 25px;
+  margin-bottom: 12px;
+}
+
+.lesson h3 {
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+.lesson p {
+  color: #888;
+  font-size: 12px;
+}
+
+.challenge {
+  background: #edf4f0;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.challenge p {
+  font-size: 14px;
+  color: #65736b;
+  margin: 8px 0 15px;
+}
+
+button.primary {
+  border: none;
+  background: #31866a;
+  color: white;
+  border-radius: 10px;
+  padding: 13px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: white;
+  color: #31866a;
+  border: 1px solid #31866a;
+  border-radius: 10px;
+  padding: 11px 15px;
+  cursor: pointer;
+}
+
+#lessonContent {
+  display: none;
+  background: white;
+  padding: 22px;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+#lessonContent p {
+  color: #666;
+  line-height: 1.6;
+  margin: 12px 0;
+}
+
+.word-card {
+  background: #f7f8fa;
+  border-radius: 14px;
+  padding: 25px 15px;
+  text-align: center;
+  margin: 18px 0;
+}
+
+.word-card h2 {
+  font-size: 27px;
+  margin-bottom: 10px;
+}
+
+.word-card p {
+  font-size: 15px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 13px;
+  font-size: 14px;
+}
+
+.task input {
+  width: 19px;
+  height: 19px;
+  accent-color: #31866a;
+}
+
+nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: space-around;
+  padding: 14px 5px;
+}
+
+nav button {
+  background: none;
+  border: none;
+  color: #777;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+nav span {
+  display: block;
+  font-size: 21px;
+  margin-bottom: 4px;
+}
+
+footer {
+  text-align: center;
+  color: #999;
+  font-size: 12px;
+  padding: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">DEIN DEUTSCH. DEIN ZIEL.</div>
+  <h1>Hallo! 🇩🇪</h1>
+  <p class="subtitle">Welcome to your German B1 journey.</p>
+</header>
+
+<main id="home">
+
+  <section class="welcome">
+    <h2>Schön, dass du da bist!</h2>
+    <p>Every day is a new opportunity to improve your German.</p>
+  </section>
+
+  <h2 class="section-title">Mein Lernfortschritt</h2>
+
+  <section class="progress-card">
+    <div class="progress-top">
+      <strong>Daily learning goals</strong>
+      <strong id="progressText">0%</strong>
+    </div>
+    <div class="track">
+      <div class="fill" id="progressBar"></div>
+    </div>
+    <p style="font-size:12px;color:#888;margin-top:10px" id="progressDetail">
+      Complete your daily tasks to make progress.
+    </p>
+  </section>
+
+  <h2 class="section-title">Meine Lernbereiche</h2>
+
+  <section class="grid">
+    <button class="lesson" onclick="openLesson('Lesen')">
+      <div class="emoji">📖</div>
+      <h3>Lesen</h3>
+      <p>Reading practice</p>
+    </button>
+
+    <button class="lesson" onclick="openLesson('Hören')">
+      <div class="emoji">🎧</div>
+      <h3>Hören</h3>
+      <p>Listening practice</p>
+    </button>
+
+    <button class="lesson" onclick="openLesson('Schreiben')">
+      <div class="emoji">✍️</div>
+      <h3>Schreiben</h3>
+      <p>Writing practice</p>
+    </button>
+
+    <button class="lesson" onclick="openLesson('Sprechen')">
+      <div class="emoji">🎤</div>
+      <h3>Sprechen</h3>
+      <p>Speaking practice</p>
+    </button>
+
+    <button class="lesson" onclick="openLesson('Grammatik')">
+      <div class="emoji">📝</div>
+      <h3>Grammatik</h3>
+      <p>Grammar exercises</p>
+    </button>
+
+    <button class="lesson" onclick="openLesson('Wortschatz')">
+      <div class="emoji">📚</div>
+      <h3>Wortschatz</h3>
+      <p>Vocabulary practice</p>
+    </button>
+  </section>
+
+  <section class="challenge">
+    <h3>🌱 Deine Tagesaufgabe</h3>
+    <p>Learn five German words and practise for 30 minutes today.</p>
+    <button class="primary" onclick="openLesson('Wortschatz')">
+      Start learning
+    </button>
+  </section>
+
+  <h2 class="section-title">Meine täglichen Ziele</h2>
+
+  <section class="progress-card">
+    <label class="task">
+      <input type="checkbox" class="dailyTask">
+      Learn five new German words
+    </label>
+    <label class="task">
+      <input type="checkbox" class="dailyTask">
+      Read one German text
+    </label>
+    <label class="task">
+      <input type="checkbox" class="dailyTask">
+      Practise German grammar
+    </label>
+    <label class="task">
+      <input type="checkbox" class="dailyTask">
+      Write a short German text
+    </label>
+    <label class="task">
+      <input type="checkbox" class="dailyTask">
+      Speak German for five minutes
+    </label>
+  </section>
+
+</main>
+
+<section id="lessonContent">
+  <button class="secondary" onclick="goHome()">← Back to home</button>
+  <h2 id="lessonTitle" style="margin-top:20px">Lesson</h2>
+  <p id="lessonDescription"></p>
+
+  <div id="vocabularyArea" style="display:none">
+    <div class="word-card">
+      <h2 id="word">die Erfahrung</h2>
+      <p id="meaning">Tap reveal to see the English meaning.</p>
+    </div>
+    <div class="actions">
+      <button class="primary" onclick="revealWord()">Reveal meaning</button>
+      <button class="secondary" onclick="nextWord()">Next word →</button>
+    </div>
+  </div>
+
+  <div id="practiceArea">
+    <p>Our next lessons will include real B1-level exercises, explanations and practice questions.</p>
+  </div>
+</section>
+
+<footer>
+  Mein-Deutsch-B1 · Schritt für Schritt zum Erfolg 🇩🇪
+</footer>
+
+<nav>
+  <button onclick="goHome()"><span>⌂</span>Home</button>
+  <button onclick="openLesson('Wortschatz')"><span>📚</span>Learn</button>
+  <button onclick="showProgress()"><span>◷</span>Progress</button>
+  <button onclick="openLesson('Grammatik')"><span>✎</span>Practice</button>
+</nav>
+
+<script>
+const words = [
+  {de:"die Erfahrung",en:"experience"},
+  {de:"die Möglichkeit",en:"possibility"},
+  {de:"die Entscheidung",en:"decision"},
+  {de:"sich bewerben",en:"to apply for a job"},
+  {de:"zuverlässig",en:"reliable"},
+  {de:"die Herausforderung",en:"challenge"},
+  {de:"die Umgebung",en:"surroundings"},
+  {de:"die Gesundheit",en:"health"},
+  {de:"die Verantwortung",en:"responsibility"},
+  {de:"vereinbaren",en:"to arrange or agree"}
+];
+
+let currentWord = 0;
+
+const taskInputs = document.querySelectorAll(".dailyTask");
+
+function updateProgress() {
+  let completed = 0;
+
+  taskInputs.forEach((task, index) => {
+    if (task.checked) completed++;
+    localStorage.setItem("b1task" + index, task.checked);
+  });
+
+  const percent = Math.round((completed / taskInputs.length) * 100);
+
+  document.getElementById("progressText").textContent = percent + "%";
+  document.getElementById("progressBar").style.width = percent + "%";
+  document.getElementById("progressDetail").textContent =
+    completed + " of 5 daily goals completed.";
+}
+
+taskInputs.forEach((task, index) => {
+  task.checked = localStorage.getItem("b1task" + index) === "true";
+  task.addEventListener("change", updateProgress);
+});
+
+updateProgress();
+
+function openLesson(name) {
+  document.getElementById("home").style.display = "none";
+  document.getElementById("lessonContent").style.display = "block";
+  document.getElementById("lessonTitle").textContent = name;
+
+  const descriptions = {
+    Lesen: "Train your reading comprehension with German B1 texts.",
+    Hören: "Improve your listening and understand spoken German.",
+    Schreiben: "Practise emails, letters and expressing your opinions.",
+    Sprechen: "Build confidence in German conversations.",
+    Grammatik: "Improve your grammar with B1-level exercises.",
+    Wortschatz: "Learn useful German B1 vocabulary every day."
+  };
+
+  document.getElementById("lessonDescription").textContent =
+    descriptions[name] || "Let's practise German!";
+
+  const isVocabulary = name === "Wortschatz";
+
+  document.getElementById("vocabularyArea").style.display =
+    isVocabulary ? "block" : "none";
+
+  document.getElementById("practiceArea").style.display =
+    isVocabulary ? "none" : "block";
+
+  if (isVocabulary) showWord();
+  window.scrollTo(0, 0);
+}
+
+function showWord() {
+  document.getElementById("word").textContent = words[currentWord].de;
+  document.getElementById("meaning").textContent =
+    "Tap reveal to see the English meaning.";
+}
+
+function revealWord() {
+  document.getElementById("meaning").textContent =
+    words[currentWord].en;
+}
+
+function nextWord() {
+  currentWord = (currentWord + 1) % words.length;
+  showWord();
+}
+
+function goHome() {
+  document.getElementById("lessonContent").style.display = "none";
+  document.getElementById("home").style.display = "block";
+  window.scrollTo(0, 0);
+}
+
+function showProgress() {
+  goHome();
+  document.querySelector(".progress-card").scrollIntoView({
+    behavior: "smooth"
+  });
+}
+</script>
+
+</body>
+</html>
