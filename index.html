@@ -490,6 +490,773 @@ function showProgress() {
     behavior: "smooth"
   });
 }
+  // ===== MEINE BIBLIOTHEK =====
+
+(function addMeineBibliothek() {
+  const home = document.getElementById("home");
+
+  if (!home || document.getElementById("meineBibliothek")) return;
+
+  const library = document.createElement("section");
+  library.id = "meineBibliothek";
+  library.style.cssText =
+    "margin:24px 0;padding:20px;background:white;border-radius:16px;";
+
+  library.innerHTML = `
+    <h2>📚 Meine Bibliothek</h2>
+    <p>Meine Deutsch-B1 Lernbücher</p>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button onclick="showBibliothek('B1.1','Kursbuch')">
+        Menschen B1.1
+      </button>
+      <button onclick="showBibliothek('B1.2','Kursbuch')">
+        Menschen B1.2
+      </button>
+    </div>
+
+    <div id="bibliothekDetails" style="margin-top:20px;">
+      <p>Wähle dein Buch aus, um deine Lektionen zu sehen.</p>
+    </div>
+  `;
+
+  home.appendChild(library);
+
+  window.showBibliothek = function(level, book) {
+    const details = document.getElementById("bibliothekDetails");
+
+    const lessons = Array.from(
+      {length: 12},
+      (_, i) => i + 1
+    );
+
+    const key = "bibliothek-" + level + "-" + book;
+    const completed = JSON.parse(
+      localStorage.getItem(key) || "[]"
+    );
+
+    details.innerHTML = `
+      <h3>Menschen ${level}</h3>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="showBibliothek('${level}','Kursbuch')">
+          Kursbuch
+        </button>
+        <button onclick="showBibliothek('${level}','Arbeitsbuch')">
+          Arbeitsbuch
+        </button>
+      </div>
+
+      <h3>${book} – Lektionen</h3>
+      <p>${completed.length} von 12 Lektionen erledigt</p>
+
+      ${lessons.map(n => `
+        <div style="padding:12px;margin:8px 0;
+          background:#f3f4f6;border-radius:10px;">
+          <span>📖 Lektion ${n}</span>
+          <button style="float:right;"
+            onclick="toggleBibliothek('${level}','${book}',${n})">
+            ${completed.includes(n) ? "✓ Erledigt" : "Als erledigt markieren"}
+          </button>
+        </div>
+      `).join("")}
+    `;
+  };
+
+  window.toggleBibliothek = function(level, book, lesson) {
+    const key = "bibliothek-" + level + "-" + book;
+    let completed = JSON.parse(localStorage.getItem(key) || "[]");
+
+    completed = completed.includes(lesson)
+      ? completed.filter(n => n !== lesson)
+      : [...completed, lesson];
+
+    localStorage.setItem(key, JSON.stringify(completed));
+    showBibliothek(level, book);
+  };
+})();
+  /* =========================================
+   MEIN-DEUTSCH-B1
+   GOETHE B1 - GROUP 1: PRÜFUNGEN 1-5
+   Originale B1-Übungsprüfungen
+   ========================================= */
+
+(function () {
+  const old = document.getElementById("goethePruefung");
+  if (old) old.remove();
+
+  const oldStyle = document.getElementById("goetheGroup1Style");
+  if (oldStyle) oldStyle.remove();
+
+  const exams = [
+    {
+      name: "Prüfung 1 – Alltag und Freizeit",
+      reading: [
+        ["Teil 1 – Kurze Nachrichten", "Anna schreibt: Ich kann heute leider nicht zum Deutschkurs kommen. Mein Sohn ist krank. Kannst du mir bitte die Hausaufgaben schicken?", "Warum kommt Anna nicht zum Kurs?", ["Sie muss arbeiten.", "Ihr Sohn ist krank.", "Sie fährt in den Urlaub."], 1],
+        ["Teil 2 – Informationen", "Das Schwimmbad ist von Montag bis Freitag von 8 bis 20 Uhr geöffnet. Am Wochenende öffnet es erst um 10 Uhr. Jeden Mittwoch ist Familientag.", "Wann beginnt das Schwimmbad am Samstag?", ["Um 8 Uhr.", "Um 9 Uhr.", "Um 10 Uhr."], 2],
+        ["Teil 3 – Anzeige", "Fahrrad zu verkaufen! Sehr guter Zustand, drei Jahre alt. Neue Reifen. Preis: 120 Euro. Nur Selbstabholung.", "Was muss der Käufer machen?", ["Das Fahrrad selbst abholen.", "Neue Reifen kaufen.", "Das Fahrrad reparieren."], 0],
+        ["Teil 4 – Meinungen", "Lukas: Ich treibe gern Sport, weil ich mich danach besser fühle. Besonders gern spiele ich Fußball mit Freunden.", "Warum macht Lukas Sport?", ["Er möchte Geld verdienen.", "Er fühlt sich danach besser.", "Er muss für die Arbeit trainieren."], 1],
+        ["Teil 5 – Längerer Text", "Viele Menschen haben heute wenig Zeit für ihre Hobbys. Trotzdem ist Freizeit wichtig. Wer regelmäßig etwas Schönes macht, kann Stress abbauen und neue Energie bekommen.", "Was ist laut Text ein Vorteil von Freizeit?", ["Man kann Stress abbauen.", "Man muss weniger schlafen.", "Man verdient mehr Geld."], 0]
+      ],
+      listening: [
+        ["Teil 1 – Eine Nachricht", "Hallo Peter, hier ist Maria. Unser Treffen heute um fünf Uhr muss leider ausfallen. Ich habe einen Arzttermin bekommen. Können wir uns morgen um sechs Uhr treffen?", "Wann möchte Maria Peter treffen?", ["Heute um fünf Uhr.", "Morgen um sechs Uhr.", "Morgen um fünf Uhr."], 1],
+        ["Teil 2 – Eine Durchsage", "Achtung, liebe Fahrgäste! Der Zug nach Köln fährt heute nicht von Gleis drei, sondern von Gleis fünf. Die Abfahrt ist um 14 Uhr 20.", "Von welchem Gleis fährt der Zug?", ["Gleis drei.", "Gleis vier.", "Gleis fünf."], 2],
+        ["Teil 3 – Ein Gespräch", "Mutter: Was möchtest du am Wochenende machen? Sohn: Ich möchte ins Kino gehen. Mutter: Gute Idee. Am Samstag können wir den Film um 18 Uhr sehen.", "Was möchte der Sohn machen?", ["Ins Kino gehen.", "Sport treiben.", "Seine Großeltern besuchen."], 0],
+        ["Teil 4 – Eine Information", "Der Deutschkurs beginnt nächste Woche am Montag. Der Unterricht findet immer montags und mittwochs von 17 bis 19 Uhr statt. Bitte bringen Sie ein Wörterbuch mit.", "An welchen Tagen findet der Kurs statt?", ["Dienstag und Donnerstag.", "Montag und Mittwoch.", "Montag und Freitag."], 1]
+      ],
+      writing: [
+        "Du kannst am Samstag nicht zu einer Geburtstagsfeier kommen. Schreibe deinem Freund eine Nachricht. Entschuldige dich, erkläre den Grund und schlage einen anderen Termin vor.",
+        "Schreibe einen Forumsbeitrag zum Thema: Soll man seine Freizeit lieber allein oder mit Freunden verbringen? Schreibe deine Meinung, Gründe und Beispiele.",
+        "Du möchtest dich für einen Sportkurs anmelden. Schreibe eine kurze E-Mail und frage nach Kurszeiten, Kosten und Anmeldung."
+      ],
+      speaking: [
+        "Teil 1 – Gemeinsam etwas planen: Du und dein Partner möchtet am Wochenende einen Ausflug machen. Sprecht über Ziel, Verkehrsmittel, Zeit und Kosten.",
+        "Teil 2 – Präsentation: Erzähle über deine Freizeit. Was machst du gern? Wie oft? Mit wem? Welche Vorteile hat dein Hobby?",
+        "Teil 3 – Auf Fragen reagieren: Beantworte Fragen zu deiner Präsentation und stelle deinem Partner eine Frage."
+      ]
+    },
+    {
+      name: "Prüfung 2 – Gesundheit und Ernährung",
+      reading: [
+        ["Teil 1 – Kurze Nachricht", "Liebe Sara, ich gehe morgen zum Arzt und kann deshalb nicht mit dir frühstücken. Vielleicht haben wir am Freitag Zeit. Liebe Grüße, Nina.", "Warum kann Nina nicht frühstücken?", ["Sie ist bei der Arbeit.", "Sie geht zum Arzt.", "Sie fährt weg."], 1],
+        ["Teil 2 – Informationen", "Das Gesundheitszentrum bietet Yoga am Dienstag und Donnerstag an. Der Kurs beginnt jeweils um 18 Uhr. Eine Anmeldung ist notwendig.", "Wann findet der Yoga-Kurs statt?", ["Dienstag und Donnerstag.", "Montag und Mittwoch.", "Nur am Wochenende."], 0],
+        ["Teil 3 – Anzeige", "Kochkurs für Anfänger! Lernen Sie einfache und gesunde Gerichte zuzubereiten. Jeden Samstag von 10 bis 13 Uhr. Zutaten sind im Preis enthalten.", "Was ist im Preis enthalten?", ["Ein Kochbuch.", "Die Zutaten.", "Ein Abendessen im Restaurant."], 1],
+        ["Teil 4 – Meinung", "Julia: Ich esse nicht jeden Tag Fleisch. Gemüse und Obst schmecken mir gut. Außerdem finde ich es wichtig, genug Wasser zu trinken.", "Was ist Julia wichtig?", ["Jeden Tag Fleisch zu essen.", "Wenig Wasser zu trinken.", "Gesund zu essen."], 2],
+        ["Teil 5 – Längerer Text", "Regelmäßige Bewegung hilft dem Körper. Man muss nicht jeden Tag ins Fitnessstudio gehen. Schon ein Spaziergang von dreißig Minuten kann gut für die Gesundheit sein.", "Was empfiehlt der Text?", ["Jeden Tag einen Marathon laufen.", "Regelmäßig spazieren gehen.", "Nur am Wochenende Sport machen."], 1]
+      ],
+      listening: [
+        ["Teil 1 – Eine Nachricht", "Hallo! Ich habe heute einen Termin beim Zahnarzt. Deshalb komme ich etwas später zur Arbeit. Ich bin ungefähr um zehn Uhr im Büro.", "Wann kommt die Person ins Büro?", ["Um neun Uhr.", "Um zehn Uhr.", "Um elf Uhr."], 1],
+        ["Teil 2 – Eine Durchsage", "Liebe Kunden, unser Supermarkt schließt heute wegen einer Reparatur bereits um 18 Uhr. Morgen sind wir wieder wie gewohnt geöffnet.", "Wann schließt der Supermarkt heute?", ["Um 17 Uhr.", "Um 18 Uhr.", "Um 20 Uhr."], 1],
+        ["Teil 3 – Ein Gespräch", "Arzt: Sie sollten mehr Wasser trinken und sich regelmäßig bewegen. Patient: Muss ich auch meine Ernährung ändern? Arzt: Ja, essen Sie mehr Gemüse und weniger Süßigkeiten.", "Was empfiehlt der Arzt?", ["Mehr Süßigkeiten essen.", "Weniger Wasser trinken.", "Mehr Gemüse essen."], 2],
+        ["Teil 4 – Eine Information", "Der Kochkurs beginnt am Samstag um 10 Uhr. Bitte kommen Sie zehn Minuten früher. Die Küche befindet sich im zweiten Stock.", "Wo findet der Kochkurs statt?", ["Im ersten Stock.", "Im zweiten Stock.", "Im Erdgeschoss."], 1]
+      ],
+      writing: [
+        "Du bist krank und kannst nicht zum Deutschkurs kommen. Schreibe deiner Lehrerin eine E-Mail. Entschuldige dich, erkläre deine Situation und frage nach den Hausaufgaben.",
+        "Schreibe einen Forumsbeitrag zum Thema: Ist gesundes Essen im Alltag wichtig? Nenne deine Meinung, Gründe und Beispiele.",
+        "Du möchtest mit einem Freund zusammen Sport machen. Schreibe ihm eine Nachricht mit einem Vorschlag für Zeit und Ort."
+      ],
+      speaking: [
+        "Teil 1 – Gemeinsam planen: Plant zusammen einen gesunden Kochabend. Sprecht über Essen, Einkauf, Ort und Aufgaben.",
+        "Teil 2 – Präsentation: Erzähle über gesunde Ernährung. Was isst du gern? Was ist gesund? Wie kann man gesund leben?",
+        "Teil 3 – Auf Fragen reagieren: Beantworte Fragen zu deinem Thema und frage deinen Partner nach seiner Meinung."
+      ]
+    },
+    {
+      name: "Prüfung 3 – Arbeit und Beruf",
+      reading: [
+        ["Teil 1 – Kurze Nachricht", "Hallo Tom, ich habe eine neue Stelle gefunden! Ich arbeite ab nächsten Monat in einem Hotel. Ich freue mich sehr auf die neue Aufgabe.", "Wo wird Tom arbeiten?", ["In einem Hotel.", "In einer Schule.", "In einem Krankenhaus."], 0],
+        ["Teil 2 – Informationen", "Die Jobmesse findet am Freitag von 9 bis 16 Uhr im Kongresszentrum statt. Der Eintritt ist kostenlos. Besucher können ihren Lebenslauf mitbringen.", "Was können Besucher mitbringen?", ["Einen Reisepass.", "Einen Lebenslauf.", "Ein Wörterbuch."], 1],
+        ["Teil 3 – Anzeige", "Wir suchen eine freundliche Mitarbeiterin für unser Café. Arbeitszeit: Montag bis Freitag, 8 bis 13 Uhr. Erfahrung ist willkommen, aber nicht notwendig.", "Wann arbeitet man in diesem Café?", ["Am Nachmittag.", "Am Wochenende.", "Am Vormittag."], 2],
+        ["Teil 4 – Meinung", "Markus: Ich arbeite gern im Team. Wenn wir Probleme haben, können wir gemeinsam Lösungen finden. Außerdem lerne ich viel von meinen Kollegen.", "Warum arbeitet Markus gern im Team?", ["Er kann gemeinsam Probleme lösen.", "Er muss weniger lernen.", "Er arbeitet immer allein."], 0],
+        ["Teil 5 – Längerer Text", "Ein gutes Bewerbungsgespräch braucht Vorbereitung. Bewerber sollten sich über das Unternehmen informieren und pünktlich sein. Auch passende Kleidung ist wichtig.", "Was sollte man vor einem Bewerbungsgespräch tun?", ["Zu spät kommen.", "Sich über das Unternehmen informieren.", "Keine Fragen vorbereiten."], 1]
+      ],
+      listening: [
+        ["Teil 1 – Eine Nachricht", "Guten Morgen, Frau Weber. Das Vorstellungsgespräch findet nicht am Dienstag statt. Wir möchten Sie am Mittwoch um 11 Uhr einladen.", "Wann ist das Vorstellungsgespräch?", ["Dienstag um 11 Uhr.", "Mittwoch um 11 Uhr.", "Donnerstag um 10 Uhr."], 1],
+        ["Teil 2 – Eine Durchsage", "Die Mitarbeiterbesprechung beginnt heute ausnahmsweise um 15 Uhr im Raum 204. Bitte bringen Sie Ihre Unterlagen mit.", "Wo findet die Besprechung statt?", ["Raum 204.", "Raum 104.", "Raum 240."], 0],
+        ["Teil 3 – Ein Gespräch", "Chef: Wie gefällt Ihnen die neue Arbeit? Mitarbeiterin: Sehr gut. Meine Kollegen sind freundlich, und ich lerne jeden Tag etwas Neues.", "Was gefällt der Mitarbeiterin?", ["Sie arbeitet allein.", "Die Arbeit ist immer einfach.", "Die Kollegen sind freundlich."], 2],
+        ["Teil 4 – Eine Information", "Unser Büro ist am Freitag wegen einer Schulung geschlossen. Ab Montag sind wir wieder ab 8 Uhr erreichbar.", "Wann ist das Büro wieder geöffnet?", ["Am Freitag.", "Am Samstag.", "Am Montag."], 2]
+      ],
+      writing: [
+        "Du hast eine Einladung zu einem Vorstellungsgespräch bekommen. Schreibe eine Antwort. Bedanke dich, bestätige den Termin und frage nach den benötigten Unterlagen.",
+        "Schreibe einen Forumsbeitrag zum Thema: Ist es besser, allein oder im Team zu arbeiten? Begründe deine Meinung.",
+        "Du möchtest dich für einen Deutschkurs anmelden, weil du ihn für deine Arbeit brauchst. Schreibe eine E-Mail an die Sprachschule."
+      ],
+      speaking: [
+        "Teil 1 – Gemeinsam planen: Plant eine Informationsveranstaltung über Berufe für junge Menschen. Sprecht über Ort, Zeit, Gäste und Werbung.",
+        "Teil 2 – Präsentation: Erzähle über deinen Wunschberuf. Welche Aufgaben hat man? Welche Fähigkeiten braucht man? Warum interessiert dich dieser Beruf?",
+        "Teil 3 – Auf Fragen reagieren: Beantworte Fragen zu deinem Wunschberuf und frage deinen Partner nach seinen Berufsplänen."
+      ]
+    },
+    {
+      name: "Prüfung 4 – Reisen und Umwelt",
+      reading: [
+        ["Teil 1 – Kurze Nachricht", "Liebe Lea, unser Zug hat leider 30 Minuten Verspätung. Ich warte noch am Bahnhof. Bitte warte mit dem Abendessen auf mich.", "Was ist passiert?", ["Der Zug hat Verspätung.", "Das Restaurant ist geschlossen.", "Lea hat den Zug verpasst."], 0],
+        ["Teil 2 – Informationen", "Das Naturmuseum ist täglich außer Montag geöffnet. Von Dienstag bis Sonntag können Besucher die Ausstellung von 10 bis 17 Uhr besuchen.", "An welchem Tag ist das Museum geschlossen?", ["Dienstag.", "Sonntag.", "Montag."], 2],
+        ["Teil 3 – Anzeige", "Fahrradtour am Sonntag! Wir fahren durch den Nationalpark. Start ist um 9 Uhr am Bahnhof. Bitte bringen Sie Wasser und eine Regenjacke mit.", "Was sollen die Teilnehmer mitbringen?", ["Ein Zelt und einen Schlafsack.", "Wasser und eine Regenjacke.", "Essen für drei Tage."], 1],
+        ["Teil 4 – Meinung", "Sophie: Ich fahre gern mit dem Bus. So muss ich keinen Parkplatz suchen. Außerdem ist es besser für die Umwelt, wenn weniger Menschen allein Auto fahren.", "Warum benutzt Sophie den Bus?", ["Sie hat kein Fahrrad.", "Sie möchte schneller reisen.", "Es ist praktisch und umweltfreundlicher."], 2],
+        ["Teil 5 – Längerer Text", "Immer mehr Städte bauen Fahrradwege. Dadurch können Menschen sicherer fahren. Auch die Luftqualität kann besser werden, wenn mehr Personen das Fahrrad statt des Autos benutzen.", "Was ist ein Vorteil von Fahrradwegen?", ["Menschen können sicherer fahren.", "Autos werden billiger.", "Busse fahren schneller."], 0]
+      ],
+      listening: [
+        ["Teil 1 – Eine Nachricht", "Hallo, ich bin schon im Hotel angekommen. Das Zimmer ist schön und das Frühstück beginnt morgen um sieben Uhr. Bis bald!", "Wann beginnt das Frühstück?", ["Um sechs Uhr.", "Um sieben Uhr.", "Um acht Uhr."], 1],
+        ["Teil 2 – Eine Durchsage", "Wegen starken Regens wird das Stadtfest heute in die Sporthalle verlegt. Das Programm beginnt wie geplant um 14 Uhr.", "Wo findet das Stadtfest statt?", ["Im Park.", "Am Bahnhof.", "In der Sporthalle."], 2],
+        ["Teil 3 – Ein Gespräch", "Mann: Wie fahren wir nach Bonn? Frau: Am besten mit dem Zug. Die Fahrt dauert nur eine Stunde und wir müssen keinen Parkplatz suchen.", "Warum möchten sie den Zug nehmen?", ["Die Fahrt ist kurz und praktisch.", "Der Zug ist kostenlos.", "Sie haben kein Geld für ein Ticket."], 0],
+        ["Teil 4 – Eine Information", "Die Führung durch den Nationalpark beginnt um 9 Uhr am Besucherzentrum. Die Teilnehmer sollten festes Schuhwerk tragen.", "Was sollen die Teilnehmer tragen?", ["Elegante Schuhe.", "Festes Schuhwerk.", "Sportschuhe mit hohen Absätzen."], 1]
+      ],
+      writing: [
+        "Du bist im Urlaub und möchtest einem Freund von deiner Reise erzählen. Schreibe eine Nachricht über das Wetter, deine Unterkunft und deine Aktivitäten.",
+        "Schreibe einen Forumsbeitrag zum Thema: Sollten mehr Menschen öffentliche Verkehrsmittel benutzen? Begründe deine Meinung.",
+        "Du möchtest eine Reise buchen. Schreibe eine E-Mail an ein Reisebüro und frage nach Preis, Unterkunft und Transport."
+      ],
+      speaking: [
+        "Teil 1 – Gemeinsam planen: Plant einen Tagesausflug in die Natur. Sprecht über Ziel, Transport, Essen und Treffpunkt.",
+        "Teil 2 – Präsentation: Erzähle über eine Reise, die du gern machen möchtest. Wohin? Mit wem? Was möchtest du dort sehen?",
+        "Teil 3 – Auf Fragen reagieren: Beantworte Fragen zu deiner Reise und frage deinen Partner nach seinen Reiseerfahrungen."
+      ]
+    },
+    {
+      name: "Prüfung 5 – Bildung und Medien",
+      reading: [
+        ["Teil 1 – Kurze Nachricht", "Hallo Eva, ich kann dir heute leider nicht beim Lernen helfen. Mein Computer ist kaputt und ich muss ihn reparieren lassen. Morgen habe ich wieder Zeit.", "Warum kann die Person heute nicht helfen?", ["Sie muss arbeiten.", "Ihr Computer ist kaputt.", "Sie hat einen Arzttermin."], 1],
+        ["Teil 2 – Informationen", "Die Stadtbibliothek ist montags bis freitags von 9 bis 19 Uhr geöffnet. Samstags schließt sie bereits um 14 Uhr. Sonntags bleibt sie geschlossen.", "Wie lange ist die Bibliothek am Samstag geöffnet?", ["Bis 14 Uhr.", "Bis 17 Uhr.", "Bis 19 Uhr."], 0],
+        ["Teil 3 – Anzeige", "Deutschkurs B1: Unterricht am Dienstag und Donnerstag. Beginn: 18 Uhr. Kleine Gruppen, erfahrene Lehrkräfte. Anmeldung online oder direkt im Büro.", "Wie oft findet der Kurs statt?", ["Einmal pro Woche.", "Zweimal pro Woche.", "Jeden Tag."], 1],
+        ["Teil 4 – Meinung", "David: Das Internet hilft mir beim Lernen. Ich kann Wörter nachschlagen und Videos ansehen. Aber manchmal lasse ich mich von sozialen Medien ablenken.", "Was ist für David ein Nachteil?", ["Er findet keine Wörter.", "Er kann keine Videos ansehen.", "Soziale Medien lenken ihn ab."], 2],
+        ["Teil 5 – Längerer Text", "Onlinekurse sind für viele Menschen praktisch. Man kann von zu Hause lernen und seine Zeit besser planen. Allerdings braucht man dafür eine gute Internetverbindung und viel Selbstdisziplin.", "Was braucht man für einen Onlinekurs?", ["Eine gute Internetverbindung.", "Jeden Tag eine Reise.", "Ein eigenes Büro."], 0]
+      ],
+      listening: [
+        ["Teil 1 – Eine Nachricht", "Hallo, der Unterricht fällt heute aus. Unsere Lehrerin ist krank. Die nächste Stunde findet am Donnerstag zur normalen Zeit statt.", "Wann findet die nächste Stunde statt?", ["Am Dienstag.", "Am Mittwoch.", "Am Donnerstag."], 2],
+        ["Teil 2 – Eine Durchsage", "Die Bibliothek schließt heute wegen einer Veranstaltung bereits um 16 Uhr. Bücher können bis dahin zurückgegeben werden.", "Wann schließt die Bibliothek heute?", ["Um 14 Uhr.", "Um 16 Uhr.", "Um 18 Uhr."], 1],
+        ["Teil 3 – Ein Gespräch", "Mutter: Warum lernst du am Computer? Sohn: Ich sehe ein Video über deutsche Grammatik. Danach mache ich Übungen im Internet.", "Was macht der Sohn?", ["Er sieht ein Lernvideo und macht Übungen.", "Er spielt ein Computerspiel.", "Er schreibt eine E-Mail."], 0],
+        ["Teil 4 – Eine Information", "Der Workshop zum Thema digitale Medien beginnt am Samstag um 10 Uhr. Er findet im Raum 3 statt. Die Teilnahme ist kostenlos.", "Was kostet die Teilnahme?", ["Zehn Euro.", "Fünf Euro.", "Sie ist kostenlos."], 2]
+      ],
+      writing: [
+        "Du möchtest einen Deutschkurs besuchen. Schreibe eine E-Mail an eine Sprachschule. Frage nach Kursbeginn, Kosten und Unterrichtszeiten.",
+        "Schreibe einen Forumsbeitrag zum Thema: Lernen mit dem Internet – Vorteile und Nachteile. Begründe deine Meinung und gib Beispiele.",
+        "Du hast ein Buch von einem Freund ausgeliehen und möchtest es zurückgeben. Schreibe ihm eine Nachricht und schlage einen Termin vor."
+      ],
+      speaking: [
+        "Teil 1 – Gemeinsam planen: Plant zusammen einen Lerntag für eure Deutschprüfung. Sprecht über Ort, Zeit, Lernmaterialien und Pausen.",
+        "Teil 2 – Präsentation: Erzähle über deine Erfahrungen beim Lernen einer Fremdsprache. Was hilft dir? Was ist schwierig? Welche Tipps hast du?",
+        "Teil 3 – Auf Fragen reagieren: Beantworte Fragen zu deinen Lernerfahrungen und frage deinen Partner nach seinen Lernmethoden."
+      ]
+    }
+  ];
+
+  const style = document.createElement("style");
+  style.id = "goetheGroup1Style";
+  style.textContent = `
+    #goethePruefung { margin:24px 0; padding:20px; background:#f4f6fa; color:#202938; border-radius:14px; }
+    #goethePruefung .g1-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+    #goethePruefung .g1-card, #goethePruefung .g1-panel { background:white; border:1px solid #d8dee9; border-radius:12px; padding:16px; margin-bottom:12px; }
+    #goethePruefung button { cursor:pointer; border:0; border-radius:8px; padding:10px 14px; margin:5px 4px 5px 0; background:#2457a6; color:white; }
+    #goethePruefung button.g1-grey { background:#64748b; }
+    #goethePruefung .g1-text { background:#f1f5f9; padding:13px; border-radius:8px; line-height:1.7; }
+    #goethePruefung .g1-question { padding:12px 0; border-bottom:1px solid #e2e8f0; }
+    #goethePruefung .g1-question label { display:block; margin:8px 0; cursor:pointer; }
+    #goethePruefung textarea { box-sizing:border-box; width:100%; min-height:125px; padding:11px; border:1px solid #cbd5e1; border-radius:8px; font:inherit; }
+    #goethePruefung .g1-muted { color:#64748b; font-size:13px; }
+    #goethePruefung .g1-result { font-weight:bold; margin-top:12px; }
+  `;
+  document.head.appendChild(style);
+
+  const section = document.createElement("section");
+  section.id = "goethePruefung";
+  section.innerHTML = `
+    <h2>🇩🇪 Goethe-Zertifikat B1 – Prüfungstraining</h2>
+    <p><strong>Gruppe 1: Prüfungen 1–5</strong></p>
+    <p>Fünf originale B1-Übungsprüfungen mit den vier Modulen Lesen, Hören, Schreiben und Sprechen.</p>
+    <p class="g1-muted">Orientierung an der Goethe-B1-Prüfungsstruktur. Diese Übungen sind selbst erstellt und keine offiziellen Goethe-Prüfungsbögen.</p>
+    <div class="g1-panel">
+      <strong>Offizielle Prüfungszeiten:</strong>
+      <ul>
+        <li>Lesen: 65 Minuten</li>
+        <li>Hören: 40 Minuten</li>
+        <li>Schreiben: 60 Minuten</li>
+        <li>Sprechen: ca. 15 Minuten (plus Vorbereitungszeit)</li>
+      </ul>
+      <a href="https://www.goethe.de/en/spr/prf/ueb/pb1.html" target="_blank" rel="noopener noreferrer">Offizielle Goethe-B1-Übungsmaterialien ↗️</a>
+    </div>
+    <div class="g1-grid" id="g1ExamGrid"></div>
+    <div id="g1ExamArea"></div>
+  `;
+
+  const home = document.getElementById("home") || document.body;
+  home.appendChild(section);
+
+  const grid = section.querySelector("#g1ExamGrid");
+  const area = section.querySelector("#g1ExamArea");
+
+  function esc(value) {
+    return String(value).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  exams.forEach((exam, i) => {
+    const card = document.createElement("div");
+    card.className = "g1-card";
+    card.innerHTML = `
+      <h3>${esc(exam.name)}</h3>
+      <p>Lesen · Hören · Schreiben · Sprechen</p>
+      <button type="button" data-open="${i}">Prüfung starten</button>
+    `;
+    grid.appendChild(card);
+  });
+
+  function questionHTML(prefix, task, index) {
+    const [heading, text, question, options, answer] = task;
+    return `
+      <div class="g1-question">
+        <h4>${esc(heading)}</h4>
+        <p class="g1-text">${esc(text)}</p>
+        <p><strong>${esc(question)}</strong></p>
+        ${options.map((option, j) => `
+          <label>
+            <input type="radio" name="${prefix}-${index}" value="${j}">
+            ${esc(option)}
+          </label>
+        `).join("")}
+        <input type="hidden" id="${prefix}-${index}-correct" value="${answer}">
+      </div>
+    `;
+  }
+
+  function openExam(index) {
+    const exam = exams[index];
+    const prefix = "g1-" + index;
+
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+
+    area.innerHTML = `
+      <div class="g1-panel">
+        <button type="button" class="g1-grey" id="g1Back">← Zurück zu allen Prüfungen</button>
+        <h2>${esc(exam.name)}</h2>
+        <p class="g1-muted">Bearbeite die Aufgaben möglichst ohne Wörterbuch. Kontrolliere deine Antworten am Ende.</p>
+
+        <h3>1. LESEN – 65 Minuten</h3>
+        <p>Bearbeite die fünf Aufgaben. Lies die Texte sorgfältig und wähle die richtige Antwort.</p>
+        ${exam.reading.map((task, i) => questionHTML(prefix + "-r", task, i)).join("")}
+
+        <h3>2. HÖREN – 40 Minuten</h3>
+        <p>Höre jede Nachricht, Durchsage oder jedes Gespräch. Du kannst den Text abspielen und wiederholen.</p>
+        ${exam.listening.map((task, i) => `
+          <div class="g1-question">
+            <h4>${esc(task[0])}</h4>
+            <button type="button" data-audio="${i}">▶️ Hörtext abspielen</button>
+            <button type="button" class="g1-grey" data-stop="yes">■ Stop</button>
+            <p><strong>${esc(task[2])}</strong></p>
+            ${task[3].map((option, j) => `
+              <label>
+                <input type="radio" name="${prefix}-h-${i}" value="${j}">
+                ${esc(option)}
+              </label>
+            `).join("")}
+            <input type="hidden" id="${prefix}-h-${i}-correct" value="${task[4]}">
+            <details>
+              <summary>Hörtext anzeigen</summary>
+              <p class="g1-text">${esc(task[1])}</p>
+            </details>
+          </div>
+        `).join("")}
+
+        <h3>3. SCHREIBEN – 60 Minuten</h3>
+        <p>Schreibe deine Antworten auf Deutsch. Achte auf die Aufgabenpunkte, die Anrede und den Schluss.</p>
+        ${exam.writing.map((task, i) => `
+          <div class="g1-question">
+            <h4>Schreibaufgabe ${i + 1}</h4>
+            <p>${esc(task)}</p>
+            <textarea id="${prefix}-w-${i}" placeholder="Schreibe hier deine Antwort auf Deutsch..."></textarea>
+          </div>
+        `).join("")}
+
+        <h3>4. SPRECHEN – ca. 15 Minuten</h3>
+        <p>Übe laut. Wenn möglich, mache die Aufgaben zusammen mit einem Lernpartner.</p>
+        ${exam.speaking.map((task, i) => `
+          <div class="g1-question">
+            <h4>${esc("Sprechaufgabe " + (i + 1))}</h4>
+            <p>${esc(task)}</p>
+            <textarea id="${prefix}-s-${i}" placeholder="Notiere deine Stichpunkte für diese Aufgabe..."></textarea>
+          </div>
+        `).join("")}
+
+        <div class="g1-panel">
+          <h3>Antworten überprüfen</h3>
+          <p>Die automatische Kontrolle bewertet die Multiple-Choice-Aufgaben in Lesen und Hören.</p>
+          <button type="button" id="g1Check">Antworten überprüfen</button>
+          <div class="g1-result" id="${prefix}-result" aria-live="polite"></div>
+          <p class="g1-muted">Schreiben und Sprechen benötigen eine Bewertung anhand der Goethe-B1-Kriterien. Die Textfelder helfen dir, deine Antworten zu üben und zu speichern, solange die Seite geöffnet bleibt.</p>
+        </div>
+      </div>
+    `;
+
+    area.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    area.querySelector("#g1Back").addEventListener("click", () => {
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      area.innerHTML = "";
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    area.querySelectorAll("[data-audio]").forEach(button => {
+      button.addEventListener("click", () => {
+        if (!("speechSynthesis" in window)) {
+          alert("Dein Browser unterstützt leider keine Vorlesefunktion.");
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const audioIndex = Number(button.dataset.audio);
+        const utterance = new SpeechSynthesisUtterance(exam.listening[audioIndex][1]);
+        utterance.lang = "de-DE";
+        utterance.rate = 0.85;
+        window.speechSynthesis.speak(utterance);
+      });
+    });
+
+    area.querySelectorAll("[data-stop]").forEach(button => {
+      button.addEventListener("click", () => {
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      });
+    });
+
+    area.querySelector("#g1Check").addEventListener("click", () => {
+      let correct = 0;
+      let answered = 0;
+      const total = exam.reading.length + exam.listening.length;
+
+      exam.reading.forEach((task, i) => {
+        const selected = area.querySelector(`input[name="${prefix}-r-${i}"]:checked`);
+        if (selected) {
+          answered++;
+          if (Number(selected.value) === task[4]) correct++;
+        }
+      });
+
+      exam.listening.forEach((task, i) => {
+        const selected = area.querySelector(`input[name="${prefix}-h-${i}"]:checked`);
+        if (selected) {
+          answered++;
+          if (Number(selected.value) === task[4]) correct++;
+        }
+      });
+
+      area.querySelector("#" + prefix + "-result").textContent =
+        `Ergebnis: ${correct} von ${total} richtig. Beantwortet: ${answered} von ${total}.`;
+    });
+  }
+
+  grid.addEventListener("click", event => {
+    const button = event.target.closest("[data-open]");
+    if (button) openExam(Number(button.dataset.open));
+  });
+})();
+  /* =========================================
+   MEIN-DEUTSCH-B1
+   GOETHE B1 - GROUP 2: PRÜFUNGEN 6-10
+   ========================================= */
+
+(function () {
+  const old = document.getElementById("goetheGroup2");
+  if (old) old.remove();
+
+  const exams = [
+    {
+      name: "Prüfung 6 – Wohnen und Nachbarschaft",
+      reading: [
+        ["Teil 1", "Hallo Lisa, ich bin gestern in meine neue Wohnung gezogen. Sie ist kleiner als meine alte Wohnung, aber sie liegt direkt im Zentrum. Am Samstag mache ich eine kleine Einweihungsfeier.", "Was plant Lisa?", ["Eine Einweihungsfeier.", "Einen Umzug ins Ausland.", "Eine Reise."], 0],
+        ["Teil 2", "Hausordnung: Nach 22 Uhr muss es im Haus ruhig sein. Fahrräder dürfen nicht im Treppenhaus stehen. Der Müll muss getrennt werden.", "Was ist nach 22 Uhr wichtig?", ["Musik laut hören.", "Ruhe halten.", "Fahrräder im Flur abstellen."], 1],
+        ["Teil 3", "Wohnung zu vermieten: Zwei Zimmer, Balkon, neue Küche. Die Wohnung ist ab dem ersten Mai frei. Haustiere sind leider nicht erlaubt.", "Ab wann ist die Wohnung frei?", ["Ab dem ersten April.", "Ab dem ersten Mai.", "Ab dem ersten Juni."], 1],
+        ["Teil 4", "Paul: Ich wohne gern auf dem Land. Es ist ruhiger und ich habe einen Garten. Allerdings brauche ich ein Auto, weil die Busse nicht oft fahren.", "Was ist ein Nachteil des Lebens auf dem Land?", ["Es gibt zu viele Menschen.", "Die Wohnungen sind klein.", "Die Busse fahren nicht oft."], 2],
+        ["Teil 5", "Eine gute Nachbarschaft macht das Leben angenehmer. Nachbarn können sich gegenseitig helfen, zum Beispiel beim Einkaufen oder bei der Betreuung von Kindern. Wichtig ist, freundlich miteinander zu sprechen.", "Was hilft einer guten Nachbarschaft?", ["Freundlichkeit und gegenseitige Hilfe.", "Möglichst wenig Kommunikation.", "Jeder muss allein leben."], 0]
+      ],
+      listening: [
+        ["Teil 1", "Hallo, hier ist der Hausmeister. Morgen kommt ein Techniker und kontrolliert die Heizung. Bitte seien Sie zwischen neun und zwölf Uhr zu Hause.", "Wann kommt der Techniker?", ["Heute Nachmittag.", "Morgen zwischen neun und zwölf Uhr.", "Am Freitagabend."], ["Heute Nachmittag.", "Morgen zwischen neun und zwölf Uhr.", "Am Freitagabend."], 1],
+        ["Teil 2", "Liebe Bewohner, am Samstag reinigen wir den Hof. Wer helfen möchte, kann um zehn Uhr zum Haupteingang kommen. Handschuhe sind vorhanden.", "Wann beginnt die Aktion?", ["Um neun Uhr.", "Um zehn Uhr.", "Um elf Uhr."], ["Um neun Uhr.", "Um zehn Uhr.", "Um elf Uhr."], 1],
+        ["Teil 3", "Frau: Wie gefällt dir die neue Wohnung? Mann: Sehr gut. Sie hat einen großen Balkon und die Nachbarn sind nett. Nur die Küche ist etwas klein.", "Was gefällt dem Mann besonders?", ["Die große Küche.", "Der Balkon und die Nachbarn.", "Die Straße."], ["Die große Küche.", "Der Balkon und die Nachbarn.", "Die Straße."], 1],
+        ["Teil 4", "Die Wohnungsbesichtigung findet am Donnerstag um 17 Uhr statt. Bitte treffen Sie den Vermieter direkt vor dem Gebäude in der Gartenstraße 12.", "Wo treffen sich die Interessenten?", ["Vor dem Gebäude.", "Im Büro des Vermieters.", "Im Garten."], ["Vor dem Gebäude.", "Im Büro des Vermieters.", "Im Garten."], 0]
+      ],
+      writing: [
+        "Du bist umgezogen. Schreibe einem Freund eine Nachricht. Beschreibe deine neue Wohnung, deine Umgebung und lade ihn zu einem Besuch ein.",
+        "Schreibe einen Forumsbeitrag zum Thema: Ist das Leben in der Stadt besser als auf dem Land? Begründe deine Meinung und gib Beispiele.",
+        "Du hast ein Problem mit deinen Nachbarn, weil sie nachts laut Musik hören. Schreibe ihnen eine höfliche Nachricht."
+      ],
+      speaking: [
+        "Teil 1 – Gemeinsam planen: Plant eine Einweihungsfeier. Sprecht über Gäste, Essen, Getränke, Musik und Kosten.",
+        "Teil 2 – Präsentation: Erzähle über deine ideale Wohnung. Wo soll sie liegen? Wie groß soll sie sein? Was ist dir besonders wichtig?",
+        "Teil 3 – Auf Fragen reagieren: Beantworte Fragen zu deiner Wohnung und frage deinen Partner nach seiner Wohnsituation."
+      ]
+    },
+    {
+      name: "Prüfung 7 – Einkaufen und Dienstleistungen",
+      reading: [
+        ["Teil 1", "Liebe Kunden, unser Geschäft bleibt am Montag wegen Renovierungsarbeiten geschlossen. Ab Dienstag sind wir wieder wie gewohnt für Sie da.", "Wann öffnet das Geschäft wieder?", ["Am Montag.", "Am Dienstag.", "Am Mittwoch."], 1],
+        ["Teil 2", "Online-Bestellungen können innerhalb von 14 Tagen zurückgeschickt werden. Der Artikel muss unbenutzt und in der Originalverpackung sein.", "Welche Bedingung gilt für eine Rückgabe?", ["Der Artikel muss benutzt sein.", "Die Verpackung muss weggeworfen werden.", "Der Artikel muss unbenutzt sein."], 2],
+        ["Teil 3", "Suche Hilfe beim Einkaufen! Ich bin älter und kann schwere Taschen nicht mehr tragen. Ich brauche jeden Mittwoch Unterstützung. Bezahlung nach Vereinbarung.", "Wann wird Hilfe gesucht?", ["Jeden Montag.", "Jeden Mittwoch.", "Jeden Freitag."], 1],
+        ["Teil 4", "Nora: Ich vergleiche immer die Preise, bevor ich etwas kaufe. Manchmal ist ein Produkt online günstiger. Aber bei Kleidung gehe ich lieber ins Geschäft.", "Wie kauft Nora Kleidung?", ["Lieber im Geschäft.", "Nur im Internet.", "Nur auf dem Markt."], 0],
+        ["Teil 5", "Viele Menschen achten beim Einkaufen auf Nachhaltigkeit. Sie kaufen regionale Produkte und bringen eigene Taschen mit. Dadurch kann man Verpackungsmüll reduzieren und lokale Unternehmen unterstützen.", "Warum kaufen manche Menschen regionale Produkte?", ["Weil sie immer kostenlos sind.", "Um nachhaltiger einzukaufen und lokale Unternehmen zu unterstützen.", "Weil es keine anderen Produkte gibt."], 1]
+      ],
+      listening: [
+        ["Teil 1", "Guten Tag, Ihre Bestellung ist heute angekommen. Leider ist ein Artikel nicht lieferbar. Wir erstatten Ihnen dafür den Kaufpreis.", "Was ist mit einem Artikel passiert?", ["Er ist nicht lieferbar.", "Er wurde zweimal geliefert.", "Er ist kostenlos."], ["Er ist nicht lieferbar.", "Er wurde zweimal geliefert.", "Er ist kostenlos."], 0],
+        ["Teil 2", "Unsere Filiale schließt heute ausnahmsweise um 19 Uhr. Am Samstag sind wir von 9 bis 16 Uhr geöffnet.", "Wann schließt die Filiale heute?", ["Um 18 Uhr.", "Um 19 Uhr.", "Um 20 Uhr."], ["Um 18 Uhr.", "Um 19 Uhr.", "Um 20 Uhr."], 1],
+        ["Teil 3", "Kunde: Ich möchte diese Jacke zurückgeben. Verkäufer: Haben Sie den Kassenbon? Kunde: Ja, hier bitte. Verkäufer: Danke. Sie können eine andere Größe nehmen oder Ihr Geld zurückbekommen.", "Was kann der Kunde machen?", ["Nur einen Gutschein bekommen.", "Die Jacke behalten müssen.", "Eine andere Größe nehmen oder Geld zurückbekommen."], ["Nur einen Gutschein bekommen.", "Die Jacke behalten müssen.", "Eine andere Größe nehmen oder Geld zurückbekommen."], 2],
+        ["Teil 4", "Der Wochenmarkt findet am Samstag wegen des Feiertags nicht auf dem Marktplatz, sondern vor dem Rathaus statt. Die Öffnungszeiten bleiben von 8 bis 13 Uhr.", "Wo findet der Markt statt?", ["Vor dem Rathaus.", "Im Einkaufszentrum.", "Am Bahnhof."], ["Vor dem Rathaus.", "Im Einkaufszentrum.", "Am Bahnhof."], 0]
+      ],
+      writing: [
+        "Du hast online Schuhe bestellt, aber die falsche Größe bekommen. Schreibe eine Beschwerde an den Verkäufer. Erkläre das Problem und wünsche dir eine Lösung.",
+        "Schreibe einen Forumsbeitrag zum Thema: Ist Online-Shopping besser als Einkaufen im Geschäft? Nenne Vorteile, Nachteile und deine Meinung.",
+        "Du möchtest einen Termin beim Friseur vereinbaren. Schreibe eine E-Mail und frage nach einem freien Termin und den Preisen."
+      ],
+      speaking: [
+        "Teil 1 – Gemeinsam planen: Plant einen gemeinsamen Einkauf für eine Feier. Sprecht über die Einkaufsliste, das Geschäft, die Kosten und den Transport.",
+        "Teil 2 – Präsentation: Erzähle über dein Einkaufsverhalten. Wo kaufst du ein? Was kaufst du gern? Worauf achtest du?",
+        "Teil 3 – Auf Fragen reagieren: Beantworte Fragen zum Thema Einkaufen und frage deinen Partner nach seiner Meinung."
+      ]
+    },
+    {
+      name: "Prüfung 8 – Familie und Beziehungen",
+      reading: [
+        ["Teil 1", "Hallo Max, meine Schwester kommt nächste Woche zu Besuch. Sie bleibt fünf Tage bei mir. Wir möchten zusammen die Stadt besichtigen.", "Wie lange bleibt die Schwester?", ["Zwei Tage.", "Fünf Tage.", "Eine Woche."], 1],
+        ["Teil 2", "Familienzentrum: Jeden Mittwoch gibt es eine Spielgruppe für Kinder von zwei bis fünf Jahren. Eltern können währenddessen andere Familien kennenlernen.", "Für wen ist die Spielgruppe?", ["Für Kinder von zwei bis fünf Jahren.", "Für Jugendliche.", "Für ältere Menschen."], 0],
+        ["Teil 3", "Einladung: Wir feiern unsere Hochzeit am 20. Juni im Hotel am See. Bitte gebt uns bis zum 1. Juni Bescheid, ob ihr kommen könnt.", "Bis wann soll man antworten?", ["Bis zum 20. Juni.", "Bis zum 10. Juni.", "Bis zum 1. Juni."], 2],
+        ["Teil 4", "Miriam: Ich telefoniere regelmäßig mit meinen Großeltern. Sie wohnen weit weg, aber durch Videoanrufe können wir uns oft sehen.", "Wie bleibt Miriam mit ihren Großeltern in Kontakt?", ["Durch Briefe.", "Durch Videoanrufe.", "Durch tägliche Besuche."], 1],
+        ["Teil 5", "In einer Familie ist es wichtig, Aufgaben zu teilen. Wenn alle mithelfen, bleibt mehr Zeit für gemeinsame Aktivitäten. Kinder können zum Beispiel beim Aufräumen oder Tischdecken helfen.", "Was ist ein Vorteil, wenn alle helfen?", ["Es bleibt mehr Zeit für gemeinsame Aktivitäten.", "Niemand muss miteinander sprechen.", "Die Kinder müssen nie lernen."], 0]
+      ],
+      listening: [
+        ["Teil 1", "Hallo, ich wollte dich zum Familienessen am Sonntag einladen. Wir beginnen um 13 Uhr bei meinen Eltern. Kannst du einen Salat mitbringen?", "Was soll die Person mitbringen?", ["Einen Kuchen.", "Einen Salat.", "Getränke."], ["Einen Kuchen.", "Einen Salat.", "Getränke."], 1],
+        ["Teil 2", "Der Elternabend findet heute nicht im Klassenraum statt, sondern in der Aula. Beginn ist wie geplant um 18 Uhr 30.", "Wo findet der Elternabend statt?", ["Im Klassenraum.", "In der Aula.", "In der Bibliothek."], ["Im Klassenraum.", "In der Aula.", "In der Bibliothek."], 1],
+        ["Teil 3", "Frau: Wie geht es deiner Mutter? Mann: Viel besser. Sie ist wieder zu Hause und braucht nur noch etwas Ruhe. Am Wochenende besuchen wir sie.", "Wie geht es der Mutter?", ["Sie ist wieder zu Hause und es geht ihr besser.", "Sie ist noch im Ausland.", "Sie muss morgen arbeiten."], ["Sie ist wieder zu Hause und es geht ihr besser.", "Sie ist noch im Ausland.", "Sie muss morgen arbeiten."], 0],
+        ["Teil 4", "Das Familienfest beginnt am Samstag um 15 Uhr im Gemeindezentrum. Für Kinder gibt es Spiele und einen Bastelraum.", "Was gibt es für Kinder?", ["Einen Schwimmkurs.", "Ein Fußballturnier.", "Spiele und einen Bastelraum."], ["Einen Schwimmkurs.", "Ein Fußballturnier.", "Spiele und einen Bastelraum."], 2]
+      ],
+      writing: [
+        "Ein Freund hat dich zum Familienfest eingeladen. Schreibe eine Antwort. Bedanke dich, sage ob du kommen kannst und frage nach dem Weg.",
+        "Schreibe einen Forumsbeitrag zum Thema: Sollten Kinder im Haushalt helfen? Begründe deine Meinung mit Beispielen.",
+        "Du möchtest deine Großeltern besuchen, kannst aber nicht zum vereinbarten Termin kommen. Schreibe ihnen eine Nachricht und schlage einen neuen Termin vor."
+      ],
+      speaking: [
+        "Teil 1 – Gemeinsam planen: Plant ein Familienfest. Sprecht über Ort, Essen, Gäste, Aktivitäten und Aufgaben.",
+        "Teil 2 – Präsentation: Erzähle über eine Person, die dir wichtig ist. Wer ist diese Person? Was macht sie besonders? Warum ist sie wichtig für dich?",
+        "Teil 3 – Auf Fragen reagieren: Beantworte Fragen zu deiner Präsentation und frage deinen Partner nach einer wichtigen Person in seinem Leben."
+      ]
+    },
+    {
+      name: "Prüfung 9 – Kultur und Gesellschaft",
+      reading: [
+        ["Teil 1", "Hallo Julia, das Theaterstück am Freitag wurde leider abgesagt. Wir können stattdessen am Samstag ins Kino gehen. Der neue Film beginnt um 19 Uhr.", "Was ist am Freitag passiert?", ["Das Theaterstück wurde abgesagt.", "Das Kino ist geschlossen.", "Julia hat keine Zeit."], 0],
+        ["Teil 2", "Das Stadtmuseum bietet am ersten Sonntag im Monat freien Eintritt. Für Gruppen ab zehn Personen ist eine Anmeldung erforderlich.", "Wann ist der Eintritt frei?", ["Jeden Sonntag.", "Am ersten Sonntag im Monat.", "Nur am Samstag."], 1],
+        ["Teil 3", "Freiwillige gesucht! Unser Verein organisiert Sprachcafés für Menschen, die Deutsch lernen. Helfer sollten freundlich sein und gern mit anderen sprechen.", "Welche Menschen sucht der Verein?", ["Menschen, die nur Englisch sprechen.", "Menschen, die nicht gern sprechen.", "Freundliche Helfer."], 2],
+        ["Teil 4", "Ali: Ich gehe gern ins Museum, weil ich dort viel über Geschichte lernen kann. Meine Freunde finden das manchmal langweilig, aber ich interessiere mich sehr dafür.", "Warum geht Ali gern ins Museum?", ["Er kann dort Geschichte lernen.", "Er trifft dort jeden Tag seine Kollegen.", "Der Eintritt ist immer kostenlos."], 0],
+        ["Teil 5", "Kulturelle Veranstaltungen bringen Menschen zusammen. Bei Konzerten, Festen und Ausstellungen können Besucher neue Menschen kennenlernen und andere Lebensweisen entdecken.", "Was können Besucher bei kulturellen Veranstaltungen machen?", ["Nur allein bleiben.", "Neue Menschen und Lebensweisen kennenlernen.", "Immer zu Hause bleiben."], 1]
+      ],
+      listening: [
+        ["Teil 1", "Hallo, ich habe zwei Karten für das Konzert am Samstag gekauft. Es beginnt um 20 Uhr. Wir sollten uns um 19 Uhr 30 vor dem Eingang treffen.", "Wann sollen sie sich treffen?", ["Um 19 Uhr.", "Um 19 Uhr 30.", "Um 20 Uhr."], ["Um 19 Uhr.", "Um 19 Uhr 30.", "Um 20 Uhr."], 1],
+        ["Teil 2", "Die Stadtführung beginnt heute um 11 Uhr statt um 10 Uhr. Der Treffpunkt bleibt vor dem Rathaus.", "Wann beginnt die Stadtführung?", ["Um 10 Uhr.", "Um 11 Uhr.", "Um 12 Uhr."], ["Um 10 Uhr.", "Um 11 Uhr.", "Um 12 Uhr."], 1],
+        ["Teil 3", "Mann: Möchtest du am Wochenende ins Museum gehen? Frau: Gern, aber am Samstag habe ich keine Zeit. Am Sonntagvormittag wäre es gut.", "Wann möchte die Frau ins Museum gehen?", ["Am Samstag.", "Am Sonntagvormittag.", "Am Sonntagabend."], ["Am Samstag.", "Am Sonntagvormittag.", "Am Sonntagabend."], 1],
+        ["Teil 4", "Das internationale Fest findet am Samstag im Stadtpark statt. Es beginnt um 12 Uhr. Besucher können Musik aus verschiedenen Ländern hören und Spezialitäten probieren.", "Was können Besucher probieren?", ["Internationale Spezialitäten.", "Kostenlose Bücher.", "Sportgeräte."], ["Internationale Spezialitäten.", "Kostenlose Bücher.", "Sportgeräte."], 0]
+      ],
+      writing: [
+        "Du möchtest mit einer Freundin eine Ausstellung besuchen. Schreibe eine Nachricht und schlage einen Termin vor. Frage auch, ob sie Zeit hat.",
+        "Schreibe einen Forumsbeitrag zum Thema: Warum sind kulturelle Veranstaltungen wichtig? Nenne Gründe und Beispiele.",
+        "Du hast dich für einen Freiwilligenkurs angemeldet, kannst aber nicht teilnehmen. Schreibe eine höfliche E-Mail und bitte um einen neuen Termin."
+      ],
+      speaking: [
+        "Teil 1 – Gemeinsam planen: Plant einen kulturellen Abend für eure Sprachgruppe. Sprecht über Programm, Ort, Zeit und Kosten.",
+        "Teil 2 – Präsentation: Erzähle über ein Fest oder eine Tradition aus deinem Land. Wann findet es statt? Was passiert dort? Warum ist es wichtig?",
+        "Teil 3 – Auf Fragen reagieren: Beantworte Fragen zu deiner Tradition und frage deinen Partner nach einer Tradition aus seinem Land."
+      ]
+    },
+    {
+      name: "Prüfung 10 – Zukunft und Technologie",
+      reading: [
+        ["Teil 1", "Hallo Ben, ich habe mich für einen Computerkurs angemeldet. Er beginnt im September und findet zweimal pro Woche statt. Ich möchte meine Kenntnisse für die Arbeit verbessern.", "Warum besucht Ben den Kurs?", ["Um seine Kenntnisse für die Arbeit zu verbessern.", "Um Urlaub zu machen.", "Um Sport zu treiben."], 0],
+        ["Teil 2", "Reparaturservice: Wir reparieren Smartphones und Laptops. Die Diagnose ist kostenlos. Für Reparaturen benötigen wir normalerweise zwei bis drei Werktage.", "Wie lange dauert eine Reparatur normalerweise?", ["Einen Tag.", "Zwei bis drei Werktage.", "Zwei Wochen."], 1],
+        ["Teil 3", "Praktikum gesucht: Ein Unternehmen sucht ab August Praktikanten im Bereich Medien. Gute Deutschkenntnisse und Interesse an Computern sind wichtig.", "Welche Kenntnisse sind wichtig?", ["Gute Deutschkenntnisse und Interesse an Computern.", "Ein Führerschein.", "Sehr gute Kochkenntnisse."], 0],
+        ["Teil 4", "Nina: Ich finde neue Technologien interessant. Sie erleichtern viele Aufgaben. Trotzdem sollte man nicht alles online erledigen. Persönliche Gespräche sind weiterhin wichtig.", "Was findet Nina wichtig?", ["Nur online zu kommunizieren.", "Keine Technik zu benutzen.", "Auch persönliche Gespräche zu führen."], 2],
+        ["Teil 5", "Die Arbeitswelt verändert sich durch Digitalisierung. Viele Menschen können heute von zu Hause arbeiten. Das spart Zeit, verlangt aber auch gute Organisation und Selbstständigkeit.", "Was verlangt die Arbeit von zu Hause?", ["Gute Organisation und Selbstständigkeit.", "Tägliche Reisen.", "Weniger Verantwortung."], 0]
+      ],
+      listening: [
+        ["Teil 1", "Hallo, der Computerkurs beginnt nicht am Montag, sondern am Mittwoch. Der Unterricht startet um 18 Uhr im Raum 12.", "Wann beginnt der Computerkurs?", ["Am Montag.", "Am Mittwoch.", "Am Freitag."], ["Am Montag.", "Am Mittwoch.", "Am Freitag."], 1],
+        ["Teil 2", "Die Informationsveranstaltung über neue Berufe findet morgen um 16 Uhr im großen Saal statt. Bitte melden Sie sich am Eingang an.", "Wo findet die Veranstaltung statt?", ["Im großen Saal.", "Im kleinen Büro.", "Im Computerraum."], ["Im großen Saal.", "Im kleinen Büro.", "Im Computerraum."], 0],
+        ["Teil 3", "Frau: Arbeitest du gern von zu Hause? Mann: Ja, weil ich keine Zeit für den Arbeitsweg brauche. Manchmal vermisse ich aber den Kontakt zu meinen Kollegen.", "Was vermisst der Mann manchmal?", ["Seine Arbeitsaufgaben.", "Den Kontakt zu seinen Kollegen.", "Seinen Arbeitsweg."], ["Seine Arbeitsaufgaben.", "Den Kontakt zu seinen Kollegen.", "Seinen Arbeitsweg."], 1],
+        ["Teil 4", "Der Workshop zum Thema künstliche Intelligenz wird auf Freitag verschoben. Die Uhrzeit bleibt 14 Uhr. Der Veranstaltungsort ist Raum 5.", "Was hat sich geändert?", ["Die Uhrzeit.", "Der Ort.", "Der Tag."], ["Die Uhrzeit.", "Der Ort.", "Der Tag."], 2]
+      ],
+      writing: [
+        "Du möchtest einen Computerkurs besuchen. Schreibe eine E-Mail an den Anbieter und frage nach Inhalten, Dauer und Kosten.",
+        "Schreibe einen Forumsbeitrag zum Thema: Wird Technologie unser Leben einfacher machen? Nenne Vorteile, Nachteile und deine Meinung.",
+        "Du möchtest dich für ein Praktikum bewerben. Schreibe eine kurze E-Mail und erkläre, warum du dich für das Praktikum interessierst."
+      ],
+      speaking: [
+        "Teil 1 – Gemeinsam planen: Plant einen Workshop über digitale Medien. Sprecht über Thema, Ort, Zeit, Teilnehmer und Materialien.",
+        "Teil 2 – Präsentation: Erzähle über eine Technologie, die du oft benutzt. Wie funktioniert sie? Welche Vorteile und Nachteile hat sie?",
+        "Teil 3 – Auf Fragen reagieren: Beantworte Fragen zu deiner Präsentation und frage deinen Partner nach seiner Meinung über Technologie."
+      ]
+    }
+  ];
+
+  const style = document.createElement("style");
+  style.id = "goetheGroup2Style";
+  style.textContent = `
+    #goetheGroup2 { margin:24px 0; padding:20px; background:#f4f6fa; color:#202938; border-radius:14px; }
+    #goetheGroup2 .g2-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+    #goetheGroup2 .g2-card,#goetheGroup2 .g2-panel { background:white; border:1px solid #d8dee9; border-radius:12px; padding:16px; margin-bottom:12px; }
+    #goetheGroup2 button { cursor:pointer; border:0; border-radius:8px; padding:10px 14px; margin:5px 4px 5px 0; background:#2457a6; color:white; }
+    #goetheGroup2 button.g2-grey { background:#64748b; }
+    #goetheGroup2 .g2-text { background:#f1f5f9; padding:13px; border-radius:8px; line-height:1.7; }
+    #goetheGroup2 .g2-question { padding:12px 0; border-bottom:1px solid #e2e8f0; }
+    #goetheGroup2 .g2-question label { display:block; margin:8px 0; cursor:pointer; }
+    #goetheGroup2 textarea { box-sizing:border-box; width:100%; min-height:125px; padding:11px; border:1px solid #cbd5e1; border-radius:8px; font:inherit; }
+    #goetheGroup2 .g2-muted { color:#64748b; font-size:13px; }
+    #goetheGroup2 .g2-result { font-weight:bold; margin-top:12px; }
+  `;
+  document.head.appendChild(style);
+
+  const section = document.createElement("section");
+  section.id = "goetheGroup2";
+  section.innerHTML = `
+    <h2>🇩🇪 Goethe B1 – Gruppe 2</h2>
+    <p><strong>Prüfungen 6–10</strong></p>
+    <p>Fünf weitere originale B1-Übungsprüfungen mit Lesen, Hören, Schreiben und Sprechen.</p>
+    <p class="g2-muted">Selbst erstellte Übungen zur Vorbereitung auf das Goethe-Zertifikat B1. Keine offiziellen Goethe-Prüfungsbögen.</p>
+    <div class="g2-grid" id="g2Grid"></div>
+    <div id="g2Area"></div>
+  `;
+
+  const home = document.getElementById("home") || document.body;
+  const group1 = document.getElementById("goethePruefung");
+  const group2 = document.getElementById("goetheGroup2");
+
+  if (group1) group1.after(section);
+  else home.appendChild(section);
+
+  const grid = section.querySelector("#g2Grid");
+  const area = section.querySelector("#g2Area");
+
+  function esc(value) {
+    return String(value).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  exams.forEach((exam, i) => {
+    const card = document.createElement("div");
+    card.className = "g2-card";
+    card.innerHTML = `
+      <h3>${esc(exam.name)}</h3>
+      <p>Lesen · Hören · Schreiben · Sprechen</p>
+      <button type="button" data-open="${i}">Prüfung starten</button>
+    `;
+    grid.appendChild(card);
+  });
+
+  function questionHTML(prefix, task, index) {
+    return `
+      <div class="g2-question">
+        <h4>${esc(task[0])}</h4>
+        <p class="g2-text">${esc(task[1])}</p>
+        <p><strong>${esc(task[2])}</strong></p>
+        ${task[3].map((option, j) => `
+          <label>
+            <input type="radio" name="${prefix}-${index}" value="${j}">
+            ${esc(option)}
+          </label>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function openExam(index) {
+    const exam = exams[index];
+    const prefix = "g2-" + index;
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+
+    area.innerHTML = `
+      <div class="g2-panel">
+        <button type="button" class="g2-grey" id="g2Back">← Alle Prüfungen</button>
+        <h2>${esc(exam.name)}</h2>
+
+        <h3>1. LESEN – 65 Minuten</h3>
+        <p>Lies die Texte und wähle jeweils die richtige Antwort.</p>
+        ${exam.reading.map((task, i) => questionHTML(prefix + "-r", task, i)).join("")}
+
+        <h3>2. HÖREN – 40 Minuten</h3>
+        <p>Höre die Texte aufmerksam. Du kannst sie erneut abspielen.</p>
+        ${exam.listening.map((task, i) => `
+          <div class="g2-question">
+            <h4>${esc(task[0])}</h4>
+            <button type="button" data-audio="${i}">▶️ Hörtext abspielen</button>
+            <button type="button" class="g2-grey" data-stop="yes">■ Stop</button>
+            <p><strong>${esc(task[2])}</strong></p>
+            ${task[3].map((option, j) => `
+              <label><input type="radio" name="${prefix}-h-${i}" value="${j}"> ${esc(option)}</label>
+            `).join("")}
+            <details><summary>Hörtext anzeigen</summary><p class="g2-text">${esc(task[1])}</p></details>
+          </div>
+        `).join("")}
+
+        <h3>3. SCHREIBEN – 60 Minuten</h3>
+        ${exam.writing.map((task, i) => `
+          <div class="g2-question">
+            <h4>Schreibaufgabe ${i + 1}</h4>
+            <p>${esc(task)}</p>
+            <textarea placeholder="Schreibe deine Antwort auf Deutsch..."></textarea>
+          </div>
+        `).join("")}
+
+        <h3>4. SPRECHEN – ca. 15 Minuten</h3>
+        ${exam.speaking.map((task, i) => `
+          <div class="g2-question">
+            <h4>Sprechaufgabe ${i + 1}</h4>
+            <p>${esc(task)}</p>
+            <textarea placeholder="Notiere deine Stichpunkte..."></textarea>
+          </div>
+        `).join("")}
+
+        <div class="g2-panel">
+          <h3>Antworten überprüfen</h3>
+          <button type="button" id="g2Check">Antworten überprüfen</button>
+          <div class="g2-result" id="${prefix}-result" aria-live="polite"></div>
+          <p class="g2-muted">Die automatische Kontrolle bewertet Lesen und Hören. Schreiben und Sprechen müssen anhand der Goethe-B1-Kriterien überprüft werden.</p>
+        </div>
+      </div>
+    `;
+
+    area.scrollIntoView({ behavior: "smooth", block: "start" });
+
+    area.querySelector("#g2Back").addEventListener("click", () => {
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      area.innerHTML = "";
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    area.querySelectorAll("[data-audio]").forEach(button => {
+      button.addEventListener("click", () => {
+        if (!("speechSynthesis" in window)) {
+          alert("Dein Browser unterstützt leider keine Vorlesefunktion.");
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const task = exam.listening[Number(button.dataset.audio)];
+        const utterance = new SpeechSynthesisUtterance(task[1]);
+        utterance.lang = "de-DE";
+        utterance.rate = 0.85;
+        window.speechSynthesis.speak(utterance);
+      });
+    });
+
+    area.querySelectorAll("[data-stop]").forEach(button => {
+      button.addEventListener("click", () => {
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      });
+    });
+
+    area.querySelector("#g2Check").addEventListener("click", () => {
+      let correct = 0;
+      let answered = 0;
+      const total = exam.reading.length + exam.listening.length;
+
+      exam.reading.forEach((task, i) => {
+        const selected = area.querySelector(`input[name="${prefix}-r-${i}"]:checked`);
+        if (selected) {
+          answered++;
+          if (Number(selected.value) === task[4]) correct++;
+        }
+      });
+
+      exam.listening.forEach((task, i) => {
+        const selected = area.querySelector(`input[name="${prefix}-h-${i}"]:checked`);
+        if (selected) {
+          answered++;
+          if (Number(selected.value) === task[5]) correct++;
+        }
+      });
+
+      area.querySelector("#" + prefix + "-result").textContent =
+        `Ergebnis: ${correct} von ${total} richtig. Beantwortet: ${answered} von ${total}.`;
+    });
+  }
+
+  grid.addEventListener("click", event => {
+    const button = event.target.closest("[data-open]");
+    if (button) openExam(Number(button.dataset.open));
+  });
+})();
 </script>
 
 </body>
