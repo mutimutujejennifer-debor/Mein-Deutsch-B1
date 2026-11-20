@@ -1491,6 +1491,162 @@ function showProgress() {
   updateDisplay();
 })();
 })();
+  /* MEIN-DEUTSCH-B1 - DAILY STUDY PLANNER */
+(function () {
+  if (document.getElementById("b1DailyPlanner")) return;
+
+  const today = new Date().toLocaleDateString("en-CA");
+  const STORAGE_KEY = "meinDeutschB1Daily_" + today;
+
+  const tasks = [
+    { name: "📚 Menschen – Study one lesson or section", minutes: 20 },
+    { name: "✏️ Menschen Arbeitsbuch – Exercises", minutes: 15 },
+    { name: "🧠 Vocabulary – Learn 10 new words", minutes: 10 },
+    { name: "📖 Grammar – Review one grammar topic", minutes: 10 },
+    { name: "🎧 Listening – Listen to German", minutes: 10 },
+    { name: "📝 Goethe B1 – Practice exam tasks", minutes: 15 }
+  ];
+
+  let checked = [];
+  try {
+    checked = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  } catch (e) {
+    checked = [];
+  }
+
+  const section = document.createElement("section");
+  section.id = "b1DailyPlanner";
+
+  const style = document.createElement("style");
+  style.textContent = `
+    #b1DailyPlanner {
+      margin:24px 0;
+      padding:20px;
+      background:#f0f8f3;
+      border-radius:16px;
+      color:#20352a;
+    }
+    #b1DailyPlanner .daily-card {
+      background:white;
+      padding:14px;
+      border-radius:10px;
+      margin:12px 0;
+    }
+    #b1DailyPlanner .daily-task {
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      padding:12px 4px;
+      border-bottom:1px solid #eee;
+    }
+    #b1DailyPlanner .daily-task input {
+      margin-top:5px;
+      transform:scale(1.2);
+    }
+    #b1DailyPlanner .daily-bar {
+      height:18px;
+      background:#dce9df;
+      border-radius:20px;
+      overflow:hidden;
+      margin:10px 0;
+    }
+    #b1DailyPlanner .daily-fill {
+      height:100%;
+      width:0%;
+      background:#33975b;
+      transition:width .3s;
+    }
+  `;
+  document.head.appendChild(style);
+
+  section.innerHTML = `
+    <h2>📅 Mein Tagesplan</h2>
+    <p id="b1DailyDate"></p>
+    <div class="daily-card">
+      <h3>🎯 Mein Tagesziel</h3>
+      <p id="b1DailyCount">0 of 6 tasks completed</p>
+      <div class="daily-bar">
+        <div class="daily-fill" id="b1DailyFill"></div>
+      </div>
+      <strong id="b1DailyPercent">0%</strong>
+      <p id="b1DailyMinutes">0 minutes studied</p>
+    </div>
+    <div class="daily-card">
+      <h3>My study tasks</h3>
+      <div id="b1DailyTasks"></div>
+    </div>
+    <p id="b1DailyMessage"></p>
+  `;
+
+  section.querySelector("#b1DailyDate").textContent =
+    "Today: " + new Date().toLocaleDateString();
+
+  const taskList = section.querySelector("#b1DailyTasks");
+
+  tasks.forEach((task, index) => {
+    const label = document.createElement("label");
+    label.className = "daily-task";
+    label.innerHTML = `
+      <input type="checkbox" data-index="${index}">
+      <span>
+        <strong>${task.name}</strong><br>
+        <small>Suggested time: ${task.minutes} minutes</small>
+      </span>
+    `;
+    taskList.appendChild(label);
+  });
+
+  function updatePlanner() {
+    const boxes = section.querySelectorAll('input[type="checkbox"]');
+    let completed = 0;
+    let minutes = 0;
+
+    boxes.forEach((box, index) => {
+      box.checked = checked.includes(index);
+      if (box.checked) {
+        completed++;
+        minutes += tasks[index].minutes;
+      }
+    });
+
+    const percent = Math.round((completed / tasks.length) * 100);
+
+    section.querySelector("#b1DailyCount").textContent =
+      `${completed} of ${tasks.length} tasks completed`;
+
+    section.querySelector("#b1DailyFill").style.width = percent + "%";
+    section.querySelector("#b1DailyPercent").textContent = percent + "%";
+    section.querySelector("#b1DailyMinutes").textContent =
+      `${minutes} suggested study minutes completed`;
+
+    section.querySelector("#b1DailyMessage").textContent =
+      completed === tasks.length
+        ? "🎉 Wunderbar! You completed today's study plan!"
+        : completed > 0
+        ? "👏 Sehr gut! Keep going!"
+        : "🌱 Start your German study day!";
+  }
+
+  taskList.querySelectorAll("input").forEach(box => {
+    box.addEventListener("change", () => {
+      checked = Array.from(
+        taskList.querySelectorAll("input:checked")
+      ).map(input => Number(input.dataset.index));
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(checked));
+      updatePlanner();
+    });
+  });
+
+  const tracker = document.getElementById("b1ProgressTracker");
+  if (tracker && tracker.parentNode) {
+    tracker.parentNode.insertBefore(section, tracker.nextSibling);
+  } else {
+    (document.getElementById("home") || document.body).appendChild(section);
+  }
+
+  updatePlanner();
+})();
 </script>
 
 </body>
