@@ -1647,6 +1647,2652 @@ function showProgress() {
 
   updatePlanner();
 })();
+  /* MEIN-DEUTSCH-B1 - VOCABULARY TRAINER */
+(function () {
+  if (document.getElementById("b1VocabularyTrainer")) return;
+
+  const STORAGE_KEY = "meinDeutschB1Vocabulary_v1";
+
+  const vocabulary = [
+    // ALLTAG
+    { topic:"Alltag", word:"der Alltag", meaning:"everyday life", example:"Der Alltag ist manchmal stressig." },
+    { topic:"Alltag", word:"die Erfahrung", meaning:"experience", example:"Ich habe viel Erfahrung." },
+    { topic:"Alltag", word:"sich entscheiden", meaning:"to decide", example:"Ich muss mich heute entscheiden." },
+    { topic:"Alltag", word:"die Möglichkeit", meaning:"possibility / opportunity", example:"Ich habe eine gute Möglichkeit." },
+    { topic:"Alltag", word:"pünktlich", meaning:"on time", example:"Bitte sei pünktlich." },
+    { topic:"Alltag", word:"erledigen", meaning:"to complete / take care of", example:"Ich erledige meine Hausaufgaben." },
+    { topic:"Alltag", word:"die Einladung", meaning:"invitation", example:"Danke für die Einladung." },
+    { topic:"Alltag", word:"absagen", meaning:"to cancel", example:"Ich muss den Termin absagen." },
+    { topic:"Alltag", word:"vereinbaren", meaning:"to arrange / agree on", example:"Wir vereinbaren einen Termin." },
+    { topic:"Alltag", word:"die Verspätung", meaning:"delay", example:"Der Zug hat Verspätung." },
+
+    // ARBEIT
+    { topic:"Arbeit", word:"die Bewerbung", meaning:"application", example:"Ich schreibe eine Bewerbung." },
+    { topic:"Arbeit", word:"der Arbeitsplatz", meaning:"workplace", example:"Mein Arbeitsplatz ist im Büro." },
+    { topic:"Arbeit", word:"das Gehalt", meaning:"salary", example:"Das Gehalt ist gut." },
+    { topic:"Arbeit", word:"die Ausbildung", meaning:"vocational training", example:"Sie macht eine Ausbildung." },
+    { topic:"Arbeit", word:"der Kollege", meaning:"colleague (male)", example:"Mein Kollege ist freundlich." },
+    { topic:"Arbeit", word:"die Kollegin", meaning:"colleague (female)", example:"Meine Kollegin hilft mir." },
+    { topic:"Arbeit", word:"kündigen", meaning:"to resign / terminate", example:"Er möchte seine Arbeit kündigen." },
+    { topic:"Arbeit", word:"das Vorstellungsgespräch", meaning:"job interview", example:"Morgen habe ich ein Vorstellungsgespräch." },
+    { topic:"Arbeit", word:"selbstständig", meaning:"self-employed / independent", example:"Sie arbeitet selbstständig." },
+    { topic:"Arbeit", word:"die Verantwortung", meaning:"responsibility", example:"Ich habe viel Verantwortung." },
+
+    // GESUNDHEIT
+    { topic:"Gesundheit", word:"die Gesundheit", meaning:"health", example:"Gesundheit ist sehr wichtig." },
+    { topic:"Gesundheit", word:"die Krankheit", meaning:"illness", example:"Die Krankheit dauert eine Woche." },
+    { topic:"Gesundheit", word:"sich erholen", meaning:"to recover / relax", example:"Ich muss mich erholen." },
+    { topic:"Gesundheit", word:"die Untersuchung", meaning:"examination / check-up", example:"Morgen habe ich eine Untersuchung." },
+    { topic:"Gesundheit", word:"die Ernährung", meaning:"nutrition / diet", example:"Eine gesunde Ernährung ist wichtig." },
+    { topic:"Gesundheit", word:"die Bewegung", meaning:"movement / exercise", example:"Bewegung ist gut für den Körper." },
+    { topic:"Gesundheit", word:"die Schmerzen", meaning:"pain / aches", example:"Ich habe starke Schmerzen." },
+    { topic:"Gesundheit", word:"das Medikament", meaning:"medicine", example:"Ich nehme ein Medikament." },
+    { topic:"Gesundheit", word:"das Fieber", meaning:"fever", example:"Das Kind hat Fieber." },
+    { topic:"Gesundheit", word:"die Behandlung", meaning:"treatment", example:"Die Behandlung dauert zwei Tage." },
+
+    // REISEN
+    { topic:"Reisen", word:"die Reise", meaning:"trip / journey", example:"Unsere Reise war sehr schön." },
+    { topic:"Reisen", word:"die Unterkunft", meaning:"accommodation", example:"Die Unterkunft ist günstig." },
+    { topic:"Reisen", word:"die Fahrkarte", meaning:"ticket", example:"Ich kaufe eine Fahrkarte." },
+    { topic:"Reisen", word:"die Abfahrt", meaning:"departure", example:"Die Abfahrt ist um acht Uhr." },
+    { topic:"Reisen", word:"die Ankunft", meaning:"arrival", example:"Die Ankunft ist um zehn Uhr." },
+    { topic:"Reisen", word:"reservieren", meaning:"to reserve", example:"Ich möchte ein Zimmer reservieren." },
+    { topic:"Reisen", word:"die Sehenswürdigkeit", meaning:"sight / tourist attraction", example:"Wir besuchen eine Sehenswürdigkeit." },
+    { topic:"Reisen", word:"das Gepäck", meaning:"luggage", example:"Mein Gepäck ist sehr schwer." },
+    { topic:"Reisen", word:"umsteigen", meaning:"to change trains / transfer", example:"In Frankfurt müssen wir umsteigen." },
+    { topic:"Reisen", word:"die Umgebung", meaning:"surroundings / area", example:"Die Umgebung ist sehr ruhig." }
+  ];
+
+  let saved = {};
+  try {
+    saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  } catch (e) {
+    saved = {};
+  }
+
+  let topic = "Alltag";
+  let cardIndex = 0;
+  let flipped = false;
+  let quiz = null;
+
+  const section = document.createElement("section");
+  section.id = "b1VocabularyTrainer";
+
+  const style = document.createElement("style");
+  style.textContent = `
+    #b1VocabularyTrainer {
+      margin:24px 0;padding:20px;border-radius:16px;
+      background:#fff7e8;color:#302719;
+    }
+    #b1VocabularyTrainer .vocab-box {
+      background:white;padding:18px;border-radius:12px;margin:14px 0;
+    }
+    #b1VocabularyTrainer .vocab-card {
+      min-height:160px;padding:24px;border-radius:14px;
+      background:#fff0c9;text-align:center;display:flex;
+      flex-direction:column;justify-content:center;margin:15px 0;
+    }
+    #b1VocabularyTrainer .vocab-word {font-size:26px;font-weight:bold;}
+    #b1VocabularyTrainer button,
+    #b1VocabularyTrainer select {
+      padding:10px 14px;border-radius:8px;margin:5px;
+      cursor:pointer;border:1px solid #d9c8a4;
+    }
+    #b1VocabularyTrainer button {
+      background:#8b6322;color:white;border:none;
+    }
+    #b1VocabularyTrainer .vocab-option {
+      display:block;width:100%;text-align:left;
+      background:#f4f4f4;color:#222;margin:8px 0;
+    }
+    #b1VocabularyTrainer .vocab-option:hover {background:#e8e8e8;}
+    #b1VocabularyTrainer .vocab-progress {
+      height:15px;background:#eee;border-radius:20px;overflow:hidden;margin:10px 0;
+    }
+    #b1VocabularyTrainer .vocab-fill {
+      height:100%;background:#d49a39;width:0%;transition:width .3s;
+    }
+    #b1VocabularyTrainer .vocab-message {font-weight:bold;margin-top:10px;}
+  `;
+  document.head.appendChild(style);
+
+  section.innerHTML = `
+    <h2>🧠 Mein Wortschatz – Vocabulary Trainer</h2>
+    <p>Learn German B1 vocabulary with flashcards and quizzes.</p>
+
+    <div class="vocab-box">
+      <h3>📚 Choose a topic</h3>
+      <select id="b1VocabTopic">
+        <option>Alltag</option>
+        <option>Arbeit</option>
+        <option>Gesundheit</option>
+        <option>Reisen</option>
+      </select>
+      <p id="b1VocabTopicInfo"></p>
+    </div>
+
+    <div class="vocab-box">
+      <h3>🃏 Flashcards</h3>
+      <p id="b1VocabCardCount"></p>
+      <div class="vocab-card" id="b1VocabCard">
+        <div class="vocab-word" id="b1VocabWord"></div>
+        <div id="b1VocabAnswer"></div>
+      </div>
+      <button id="b1VocabReveal">👀 Reveal meaning</button>
+      <button id="b1VocabPrev">⬅ Previous</button>
+      <button id="b1VocabNext">Next ➡</button>
+      <button id="b1VocabKnown">✅ I know this word</button>
+    </div>
+
+    <div class="vocab-box">
+      <h3>📊 My Vocabulary Progress</h3>
+      <p id="b1VocabProgressText"></p>
+      <div class="vocab-progress">
+        <div class="vocab-fill" id="b1VocabProgressFill"></div>
+      </div>
+      <strong id="b1VocabProgressPercent"></strong>
+      <p>Words marked as known are saved in your browser.</p>
+    </div>
+
+    <div class="vocab-box">
+      <h3>🎯 Vocabulary Quiz</h3>
+      <button id="b1VocabStartQuiz">Start quiz</button>
+      <div id="b1VocabQuizArea"></div>
+    </div>
+  `;
+
+  const topicSelect = section.querySelector("#b1VocabTopic");
+
+  function currentWords() {
+    return vocabulary.filter(item => item.topic === topic);
+  }
+
+  function updateProgress() {
+    const words = currentWords();
+    const known = words.filter(item => saved[item.word]).length;
+    const percent = words.length ? Math.round((known / words.length) * 100) : 0;
+
+    section.querySelector("#b1VocabProgressText").textContent =
+      `${known} of ${words.length} words learned in ${topic}`;
+
+    section.querySelector("#b1VocabProgressFill").style.width = percent + "%";
+    section.querySelector("#b1VocabProgressPercent").textContent = percent + "%";
+  }
+
+  function renderCard() {
+    const words = currentWords();
+    if (!words.length) return;
+
+    if (cardIndex >= words.length) cardIndex = 0;
+    if (cardIndex < 0) cardIndex = words.length - 1;
+
+    const item = words[cardIndex];
+    section.querySelector("#b1VocabCardCount").textContent =
+      `Card ${cardIndex + 1} of ${words.length}`;
+
+    section.querySelector("#b1VocabWord").textContent = item.word;
+    section.querySelector("#b1VocabAnswer").innerHTML = "";
+
+    if (flipped) {
+      section.querySelector("#b1VocabAnswer").innerHTML =
+        `<p><strong>${item.meaning}</strong></p><p>${item.example}</p>`;
+      section.querySelector("#b1VocabReveal").textContent = "🙈 Hide meaning";
+    } else {
+      section.querySelector("#b1VocabReveal").textContent = "👀 Reveal meaning";
+    }
+
+    updateProgress();
+  }
+
+  topicSelect.onchange = function () {
+    topic = topicSelect.value;
+    cardIndex = 0;
+    flipped = false;
+    quiz = null;
+    section.querySelector("#b1VocabQuizArea").innerHTML = "";
+    section.querySelector("#b1VocabTopicInfo").textContent =
+      `${currentWords().length} vocabulary words`;
+    renderCard();
+  };
+
+  section.querySelector("#b1VocabReveal").onclick = function () {
+    flipped = !flipped;
+    renderCard();
+  };
+
+  section.querySelector("#b1VocabNext").onclick = function () {
+    cardIndex++;
+    flipped = false;
+    renderCard();
+  };
+
+  section.querySelector("#b1VocabPrev").onclick = function () {
+    cardIndex--;
+    flipped = false;
+    renderCard();
+  };
+
+  section.querySelector("#b1VocabKnown").onclick = function () {
+    const item = currentWords()[cardIndex];
+    saved[item.word] = true;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
+    cardIndex++;
+    flipped = false;
+    renderCard();
+  };
+
+  function startQuiz() {
+    const words = currentWords();
+    if (words.length < 4) return;
+
+    quiz = {
+      index: 0,
+      score: 0,
+      questions: [...words].sort(() => Math.random() - 0.5).slice(0, 10)
+    };
+    renderQuizQuestion();
+  }
+
+  function renderQuizQuestion() {
+    const area = section.querySelector("#b1VocabQuizArea");
+    if (!quiz) return;
+
+    if (quiz.index >= quiz.questions.length) {
+      area.innerHTML = `
+        <h4>Quiz finished! 🎉</h4>
+        <p>Your score: <strong>${quiz.score} / ${quiz.questions.length}</strong></p>
+        <button id="b1VocabQuizAgain">Try again</button>
+      `;
+      area.querySelector("#b1VocabQuizAgain").onclick = startQuiz;
+      return;
+    }
+
+    const item = quiz.questions[quiz.index];
+    const others = wordsForQuiz(item);
+    const options = [item.meaning, ...others.map(w => w.meaning)]
+      .sort(() => Math.random() - 0.5);
+
+    area.innerHTML = `
+      <p>Question ${quiz.index + 1} of ${quiz.questions.length}</p>
+      <h4>What does <strong>${item.word}</strong> mean?</h4>
+    `;
+
+    options.forEach(option => {
+      const button = document.createElement("button");
+      button.className = "vocab-option";
+      button.textContent = option;
+      button.onclick = () => {
+        if (option === item.meaning) quiz.score++;
+        quiz.index++;
+        renderQuizQuestion();
+      };
+      area.appendChild(button);
+    });
+  }
+
+  function wordsForQuiz(correct) {
+    return currentWords()
+      .filter(w => w.word !== correct.word && w.meaning !== correct.meaning)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3);
+  }
+
+  section.querySelector("#b1VocabStartQuiz").onclick = startQuiz;
+
+  const tracker = document.getElementById("b1DailyPlanner");
+  if (tracker && tracker.parentNode) {
+    tracker.parentNode.insertBefore(section, tracker.nextSibling);
+  } else {
+    (document.getElementById("home") || document.body).appendChild(section);
+  }
+
+  section.querySelector("#b1VocabTopicInfo").textContent =
+    `${currentWords().length} vocabulary words`;
+  renderCard();
+})();
+ /* MEIN-DEUTSCH-B1 - GRAMMAR TRAINER */
+(function () {
+  if (document.getElementById("b1GrammarTrainer")) return;
+
+  const lessons = [
+    {
+      title:"1. Perfekt und Präteritum",
+      explanation:"Perfekt is commonly used to talk about past events. Präteritum is especially common with sein, haben and modal verbs.",
+      rule:"Perfekt: haben/sein + Partizip II. Präteritum: war, hatte, konnte, musste...",
+      examples:["Ich habe gestern Deutsch gelernt. — I studied German yesterday.","Sie war müde. — She was tired.","Wir sind nach Hause gegangen. — We went home."],
+      questions:[
+        {q:"Ich ___ gestern einen Film gesehen.",o:["habe","bin","war"],a:0,why:"sehen uses haben in the Perfekt: habe gesehen."},
+        {q:"Gestern ___ ich krank.",o:["habe","war","bin gewesen"],a:1,why:"War is the common Präteritum form of sein."}
+      ]
+    },
+    {
+      title:"2. Plusquamperfekt",
+      explanation:"Plusquamperfekt describes something that happened before another past event.",
+      rule:"hatte/war + Partizip II.",
+      examples:["Nachdem ich gegessen hatte, ging ich spazieren. — After I had eaten, I went for a walk.","Er war schon gegangen. — He had already left."],
+      questions:[
+        {q:"Nachdem sie ___, ging sie schlafen.",o:["gegessen hat","gegessen hatte","essen"],a:1,why:"Plusquamperfekt uses hatte + participle."},
+        {q:"Er ___ schon nach Hause gegangen.",o:["war","hat","wird"],a:0,why:"Gehen uses sein: war gegangen."}
+      ]
+    },
+    {
+      title:"3. Passiv",
+      explanation:"The passive focuses on what happens to something, not who does it.",
+      rule:"werden + Partizip II.",
+      examples:["Das Essen wird gekocht. — The food is being cooked.","Der Brief wurde geschrieben. — The letter was written."],
+      questions:[
+        {q:"Das Auto ___ repariert.",o:["wird","hat","ist"],a:0,why:"Present passive: wird repariert."},
+        {q:"Die Tür ___ gestern geöffnet.",o:["wird","wurde","hat"],a:1,why:"Past passive: wurde geöffnet."}
+      ]
+    },
+    {
+      title:"4. Konjunktiv II",
+      explanation:"Use Konjunktiv II for polite requests, wishes or imaginary situations.",
+      rule:"Common forms: hätte, wäre, würde + infinitive.",
+      examples:["Ich hätte gern einen Kaffee. — I would like a coffee.","Wenn ich Zeit hätte, würde ich reisen. — If I had time, I would travel."],
+      questions:[
+        {q:"___ Sie mir bitte helfen?",o:["Können","Könnten","Konnten"],a:1,why:"Könnten is a polite request."},
+        {q:"Wenn ich reich ___, würde ich ein Haus kaufen.",o:["bin","war","wäre"],a:2,why:"Imaginary situations use wäre."}
+      ]
+    },
+    {
+      title:"5. Relativsätze",
+      explanation:"Relative clauses give more information about a person or thing. The relative pronoun depends on gender and case.",
+      rule:"The relative clause verb goes to the end.",
+      examples:["Das ist der Mann, der hier wohnt. — This is the man who lives here.","Das ist die Frau, die ich kenne. — This is the woman whom I know."],
+      questions:[
+        {q:"Das ist der Mann, ___ hier arbeitet.",o:["den","der","dem"],a:1,why:"Der is nominative because the man is the subject of arbeitet."},
+        {q:"Das ist die Frau, ___ ich sehe.",o:["die","der","dem"],a:0,why:"Die is accusative feminine here."}
+      ]
+    },
+    {
+      title:"6. Infinitiv mit zu",
+      explanation:"Some verbs and expressions are followed by an infinitive with zu.",
+      rule:"Example: Ich habe vergessen, zu lernen. With separable verbs, zu goes between the prefix and verb.",
+      examples:["Ich hoffe, dich bald zu sehen. — I hope to see you soon.","Er versucht, früh aufzustehen. — He tries to get up early."],
+      questions:[
+        {q:"Ich habe vor, Deutsch ___ lernen.",o:["zu","zum","–"],a:0,why:"Vorhaben is followed by an infinitive with zu."},
+        {q:"Sie versucht, ___ .",o:["aufstehen","aufzustehen","zu aufstehen"],a:1,why:"For separable verbs, zu goes between prefix and stem: aufzustehen."}
+      ]
+    },
+    {
+      title:"7. Adjektivdeklination",
+      explanation:"Adjective endings change according to the article, gender, case and number.",
+      rule:"After der words, endings are often -e or -en. After ein words, adjectives show some gender information.",
+      examples:["Der nette Mann hilft mir. — The nice man helps me.","Ich habe eine schöne Tasche. — I have a beautiful bag.","Mit einem guten Freund. — With a good friend."],
+      questions:[
+        {q:"Der ___ Mann ist freundlich.",o:["nett","nette","netten"],a:1,why:"After der in nominative masculine, the adjective takes -e."},
+        {q:"Ich kaufe einen ___ Tisch.",o:["neue","neuen","neuer"],a:1,why:"Accusative masculine einen takes adjective ending -en."}
+      ]
+    },
+    {
+      title:"8. Wechselpräpositionen",
+      explanation:"These prepositions can take accusative or dative. Accusative describes movement to a destination; dative describes location.",
+      rule:"Wo? (where) → Dativ. Wohin? (where to) → Akkusativ.",
+      examples:["Ich bin in der Schule. — I am at school.","Ich gehe in die Schule. — I am going to school."],
+      questions:[
+        {q:"Ich gehe ___ den Park. (movement)",o:["in","im","an"],a:0,why:"Movement to a destination: in den Park (accusative)."},
+        {q:"Ich bin ___ dem Park. (location)",o:["in","im","ins"],a:1,why:"Location: im Park (in dem, dative)."}
+      ]
+    },
+    {
+      title:"9. Temporale und kausale Nebensätze",
+      explanation:"Subordinate clauses with weil, dass, wenn and obwohl send the conjugated verb to the end.",
+      rule:"Connector + subject + ... + verb at the end.",
+      examples:["Ich bleibe zu Hause, weil ich krank bin. — I stay home because I am sick.","Obwohl es regnet, gehen wir spazieren. — Although it rains, we go for a walk."],
+      questions:[
+        {q:"Ich bleibe zu Hause, weil ich müde ___.",o:["bin","ist","war"],a:0,why:"In a weil clause, the conjugated verb goes to the end."},
+        {q:"Obwohl er krank ___, arbeitet er.",o:["ist","sein","wird"],a:0,why:"Obwohl introduces a subordinate clause; ist goes at the end."}
+      ]
+    },
+    {
+      title:"10. Konnektoren",
+      explanation:"Connectors help you connect ideas and make your speaking and writing more organized.",
+      rule:"Deshalb: verb comes second. Obwohl: verb goes to the end. Trotzdem: verb comes second.",
+      examples:["Ich bin krank, deshalb bleibe ich zu Hause. — I am sick, therefore I stay home.","Obwohl es regnet, gehe ich raus. — Although it rains, I go out.","Es regnet. Trotzdem gehe ich raus. — It rains. Nevertheless, I go out."],
+      questions:[
+        {q:"Ich habe viel gelernt, ___ habe ich die Prüfung bestanden.",o:["obwohl","deshalb","weil"],a:1,why:"Deshalb connects a reason/result; the verb follows it in position 2."},
+        {q:"___ es kalt ist, gehen wir spazieren.",o:["Deshalb","Trotzdem","Obwohl"],a:2,why:"Obwohl means although and introduces a subordinate clause."}
+      ]
+    }
+  ];
+
+  const section = document.createElement("section");
+  section.id = "b1GrammarTrainer";
+
+  const style = document.createElement("style");
+  style.textContent = `
+    #b1GrammarTrainer {margin:24px 0;padding:20px;border-radius:16px;background:#f1edff;color:#28223c}
+    #b1GrammarTrainer .grammar-box {background:white;padding:16px;border-radius:12px;margin:14px 0}
+    #b1GrammarTrainer select,#b1GrammarTrainer button {padding:10px;margin:5px;border-radius:8px}
+    #b1GrammarTrainer button {background:#6045a5;color:white;border:0;cursor:pointer}
+    #b1GrammarTrainer .grammar-example {padding:8px 0;border-bottom:1px solid #eee}
+    #b1GrammarTrainer .grammar-option {display:block;text-align:left;width:100%;margin:8px 0;background:#f5f3fa;color:#222}
+    #b1GrammarTrainer .grammar-result {font-weight:bold;margin-top:10px}
+  `;
+  document.head.appendChild(style);
+
+  section.innerHTML = `
+    <h2>📘 Grammatik Trainer – B1</h2>
+    <p>Learn grammar rules, read examples and practice with interactive questions.</p>
+    <div class="grammar-box">
+      <h3>Choose a grammar topic</h3>
+      <select id="b1GrammarSelect"></select>
+    </div>
+    <div class="grammar-box">
+      <h3 id="b1GrammarTitle"></h3>
+      <p id="b1GrammarExplanation"></p>
+      <p><strong>📌 Rule:</strong> <span id="b1GrammarRule"></span></p>
+      <h4>Examples</h4>
+      <div id="b1GrammarExamples"></div>
+    </div>
+    <div class="grammar-box">
+      <h3>✏️ Practice</h3>
+      <div id="b1GrammarQuestions"></div>
+      <button id="b1GrammarCheck">Check answers</button>
+      <p id="b1GrammarResult" class="grammar-result"></p>
+      <button id="b1GrammarNext">Next topic ➡️</button>
+    </div>
+  `;
+
+  const select = section.querySelector("#b1GrammarSelect");
+  lessons.forEach((lesson, index) => {
+    const option = document.createElement("option");
+    option.value = index;
+    option.textContent = lesson.title;
+    select.appendChild(option);
+  });
+
+  let current = 0;
+
+  function renderLesson() {
+    current = Number(select.value);
+    const lesson = lessons[current];
+
+    section.querySelector("#b1GrammarTitle").textContent = lesson.title;
+    section.querySelector("#b1GrammarExplanation").textContent = lesson.explanation;
+    section.querySelector("#b1GrammarRule").textContent = lesson.rule;
+
+    const examples = section.querySelector("#b1GrammarExamples");
+    examples.innerHTML = "";
+    lesson.examples.forEach(example => {
+      const p = document.createElement("p");
+      p.className = "grammar-example";
+      p.textContent = example;
+      examples.appendChild(p);
+    });
+
+    const questions = section.querySelector("#b1GrammarQuestions");
+    questions.innerHTML = "";
+
+    lesson.questions.forEach((q, qi) => {
+      const box = document.createElement("div");
+      box.className = "grammar-example";
+      box.innerHTML = `<p><strong>${qi + 1}. ${q.q}</strong></p>`;
+      q.o.forEach((option, oi) => {
+        const label = document.createElement("label");
+        label.style.display = "block";
+        label.style.padding = "6px";
+        label.innerHTML = `<input type="radio" name="b1grammar${current}_${qi}" value="${oi}"> ${option}`;
+        box.appendChild(label);
+      });
+      questions.appendChild(box);
+    });
+
+    section.querySelector("#b1GrammarResult").textContent = "";
+  }
+
+  select.onchange = renderLesson;
+
+  section.querySelector("#b1GrammarCheck").onclick = function () {
+    const lesson = lessons[current];
+    let score = 0;
+    let feedback = [];
+
+    lesson.questions.forEach((q, qi) => {
+      const selected = section.querySelector(`input[name="b1grammar${current}_${qi}"]:checked`);
+      const answer = selected ? Number(selected.value) : -1;
+      if (answer === q.a) score++;
+      feedback.push(`${qi + 1}. ${answer === q.a ? "✅ Correct" : "❌ Correct answer: " + q.o[q.a]} — ${q.why}`);
+    });
+
+    section.querySelector("#b1GrammarResult").textContent =
+      `Your score: ${score}/${lesson.questions.length}. ` + feedback.join(" | ");
+  };
+
+  section.querySelector("#b1GrammarNext").onclick = function () {
+    select.value = (current + 1) % lessons.length;
+    renderLesson();
+  };
+
+  const vocab = document.getElementById("b1VocabularyTrainer");
+  if (vocab && vocab.parentNode) {
+    vocab.parentNode.insertBefore(section, vocab.nextSibling);
+  } else {
+    (document.getElementById("home") || document.body).appendChild(section);
+  }
+
+  renderLesson();
+})();
+  /* ==========================================
+   MEIN-DEUTSCH-B1 - LISTENING TRAINER
+========================================== */
+
+(function () {
+  if (document.getElementById("b1ListeningTrainer")) return;
+
+  const listeningData = [
+    {
+      title: "1. Einen Arzttermin vereinbaren",
+      topic: "Gesundheit",
+      text: "Guten Tag, hier ist die Arztpraxis Müller. Sie möchten einen Termin vereinbaren? Am Montag haben wir leider keine freien Termine. Am Dienstag um zehn Uhr oder am Mittwoch um fünfzehn Uhr können Sie kommen. Bitte bringen Sie Ihre Versicherungskarte mit.",
+      questions: [
+        {
+          q: "Wann kann die Person einen Termin bekommen?",
+          options: ["Am Montag", "Am Dienstag oder Mittwoch", "Am Freitag"],
+          answer: 1,
+          explanation: "Die Praxis bietet einen Termin am Dienstag oder Mittwoch an."
+        },
+        {
+          q: "Wie spät ist der Termin am Dienstag?",
+          options: ["Um 10 Uhr", "Um 12 Uhr", "Um 15 Uhr"],
+          answer: 0,
+          explanation: "Am Dienstag ist der Termin um zehn Uhr."
+        },
+        {
+          q: "Was soll die Person mitbringen?",
+          options: ["Ein Buch", "Eine Versicherungskarte", "Einen Brief"],
+          answer: 1,
+          explanation: "Die Person soll ihre Versicherungskarte mitbringen."
+        }
+      ]
+    },
+    {
+      title: "2. Eine Wohnung suchen",
+      topic: "Wohnen",
+      text: "Hallo Anna, ich habe endlich eine neue Wohnung gefunden. Sie ist nicht sehr groß, aber sie liegt direkt im Stadtzentrum. Es gibt zwei Zimmer, eine Küche und einen kleinen Balkon. Die Miete ist etwas teuer, aber ich kann zu Fuß zur Arbeit gehen. Am Samstag möchte ich die Wohnung einrichten.",
+      questions: [
+        {
+          q: "Wo liegt die neue Wohnung?",
+          options: ["Außerhalb der Stadt", "Im Stadtzentrum", "In einem Dorf"],
+          answer: 1,
+          explanation: "Die Wohnung liegt direkt im Stadtzentrum."
+        },
+        {
+          q: "Wie viele Zimmer hat die Wohnung?",
+          options: ["Ein Zimmer", "Zwei Zimmer", "Vier Zimmer"],
+          answer: 1,
+          explanation: "Die Wohnung hat zwei Zimmer."
+        },
+        {
+          q: "Warum ist die Wohnung praktisch?",
+          options: ["Sie ist kostenlos.", "Sie liegt neben einem Bahnhof.", "Er kann zu Fuß zur Arbeit gehen."],
+          answer: 2,
+          explanation: "Er kann zu Fuß zur Arbeit gehen."
+        }
+      ]
+    },
+    {
+      title: "3. Im Supermarkt",
+      topic: "Einkaufen",
+      text: "Guten Abend! Heute gibt es im Supermarkt viele Angebote. Äpfel kosten nur zwei Euro pro Kilo. Milch ist im Angebot und kostet einen Euro. Wenn Sie mehr als fünfzig Euro einkaufen, bekommen Sie eine Tasche gratis. Die Kasse schließt um acht Uhr.",
+      questions: [
+        {
+          q: "Was kostet ein Kilo Äpfel?",
+          options: ["Zwei Euro", "Fünf Euro", "Einen Euro"],
+          answer: 0,
+          explanation: "Ein Kilo Äpfel kostet zwei Euro."
+        },
+        {
+          q: "Was kostet die Milch?",
+          options: ["Zwei Euro", "Einen Euro", "Drei Euro"],
+          answer: 1,
+          explanation: "Die Milch kostet einen Euro."
+        },
+        {
+          q: "Wann bekommt man eine kostenlose Tasche?",
+          options: ["Bei jedem Einkauf", "Wenn man mehr als 50 Euro einkauft", "Wenn man Milch kauft"],
+          answer: 1,
+          explanation: "Ab einem Einkauf von mehr als 50 Euro bekommt man eine Tasche gratis."
+        }
+      ]
+    },
+    {
+      title: "4. Am Bahnhof",
+      topic: "Reisen",
+      text: "Achtung, eine wichtige Information für Reisende nach Berlin. Der Zug um zwölf Uhr fünfundzwanzig fährt heute nicht von Gleis drei, sondern von Gleis sieben. Der Zug hat außerdem ungefähr zehn Minuten Verspätung. Bitte achten Sie auf die Durchsagen.",
+      questions: [
+        {
+          q: "Wohin fährt der Zug?",
+          options: ["Nach München", "Nach Berlin", "Nach Hamburg"],
+          answer: 1,
+          explanation: "Der Zug fährt nach Berlin."
+        },
+        {
+          q: "Von welchem Gleis fährt der Zug?",
+          options: ["Gleis drei", "Gleis fünf", "Gleis sieben"],
+          answer: 2,
+          explanation: "Der Zug fährt heute von Gleis sieben."
+        },
+        {
+          q: "Wie viel Verspätung hat der Zug?",
+          options: ["10 Minuten", "20 Minuten", "30 Minuten"],
+          answer: 0,
+          explanation: "Der Zug hat ungefähr zehn Minuten Verspätung."
+        }
+      ]
+    },
+    {
+      title: "5. Ein Gespräch bei der Arbeit",
+      topic: "Beruf",
+      text: "Guten Morgen, Frau Becker. Können Sie heute bitte die E-Mails beantworten und die Besprechung für morgen vorbereiten? Um elf Uhr kommt ein neuer Kunde. Wir müssen ihm unsere Produkte vorstellen. Nach der Mittagspause können Sie die Arbeit von gestern beenden.",
+      questions: [
+        {
+          q: "Was soll Frau Becker am Morgen machen?",
+          options: ["Einkaufen gehen", "E-Mails beantworten und eine Besprechung vorbereiten", "Urlaub buchen"],
+          answer: 1,
+          explanation: "Sie soll die E-Mails beantworten und die Besprechung vorbereiten."
+        },
+        {
+          q: "Wann kommt der neue Kunde?",
+          options: ["Um 9 Uhr", "Um 10 Uhr", "Um 11 Uhr"],
+          answer: 2,
+          explanation: "Der neue Kunde kommt um elf Uhr."
+        },
+        {
+          q: "Wann soll sie die Arbeit von gestern beenden?",
+          options: ["Nach der Mittagspause", "Am Wochenende", "Am Abend"],
+          answer: 0,
+          explanation: "Sie soll die Arbeit nach der Mittagspause beenden."
+        }
+      ]
+    },
+    {
+      title: "6. Freizeit am Wochenende",
+      topic: "Freizeit",
+      text: "Hallo Tom, hast du am Wochenende Zeit? Am Samstag möchte ich mit ein paar Freunden wandern gehen. Wir treffen uns um neun Uhr vor dem Bahnhof. Wenn das Wetter schlecht ist, gehen wir stattdessen ins Kino. Am Sonntag möchte ich zu Hause bleiben und ein Buch lesen.",
+      questions: [
+        {
+          q: "Was möchte die Person am Samstag machen?",
+          options: ["Wandern", "Arbeiten", "Einkaufen"],
+          answer: 0,
+          explanation: "Am Samstag möchte die Person wandern gehen."
+        },
+        {
+          q: "Wo treffen sich die Freunde?",
+          options: ["Vor dem Kino", "Vor dem Bahnhof", "Im Park"],
+          answer: 1,
+          explanation: "Sie treffen sich vor dem Bahnhof."
+        },
+        {
+          q: "Was machen sie bei schlechtem Wetter?",
+          options: ["Sie bleiben im Bahnhof.", "Sie gehen schwimmen.", "Sie gehen ins Kino."],
+          answer: 2,
+          explanation: "Bei schlechtem Wetter gehen sie ins Kino."
+        }
+      ]
+    },
+    {
+      title: "7. Umweltschutz",
+      topic: "Umwelt",
+      text: "In unserer Stadt möchten wir die Umwelt besser schützen. Deshalb fahren viele Menschen mit dem Fahrrad zur Arbeit. Die Stadt hat neue Fahrradwege gebaut. Außerdem sollen die Bürger weniger Plastik benutzen und ihre Einkäufe mit eigenen Taschen machen. Jeder kann etwas für die Umwelt tun.",
+      questions: [
+        {
+          q: "Wie fahren viele Menschen zur Arbeit?",
+          options: ["Mit dem Fahrrad", "Mit dem Flugzeug", "Mit dem Taxi"],
+          answer: 0,
+          explanation: "Viele Menschen fahren mit dem Fahrrad zur Arbeit."
+        },
+        {
+          q: "Was hat die Stadt gebaut?",
+          options: ["Neue Schulen", "Neue Fahrradwege", "Neue Restaurants"],
+          answer: 1,
+          explanation: "Die Stadt hat neue Fahrradwege gebaut."
+        },
+        {
+          q: "Was sollen die Bürger weniger benutzen?",
+          options: ["Papier", "Glas", "Plastik"],
+          answer: 2,
+          explanation: "Die Bürger sollen weniger Plastik benutzen."
+        }
+      ]
+    },
+    {
+      title: "8. Eine Einladung zum Geburtstag",
+      topic: "Freunde",
+      text: "Liebe Maria, ich möchte dich herzlich zu meinem Geburtstag einladen. Ich feiere am Samstag, den zwanzigsten Juni, um sechzehn Uhr bei mir zu Hause. Wir werden zusammen essen, Musik hören und Spiele spielen. Bitte sag mir bis Donnerstag Bescheid, ob du kommen kannst.",
+      questions: [
+        {
+          q: "Wann ist die Geburtstagsfeier?",
+          options: ["Am Freitag", "Am Samstag", "Am Sonntag"],
+          answer: 1,
+          explanation: "Die Feier ist am Samstag."
+        },
+        {
+          q: "Um wie viel Uhr beginnt die Feier?",
+          options: ["Um 14 Uhr", "Um 15 Uhr", "Um 16 Uhr"],
+          answer: 2,
+          explanation: "Die Feier beginnt um sechzehn Uhr."
+        },
+        {
+          q: "Bis wann soll Maria antworten?",
+          options: ["Bis Donnerstag", "Bis Samstag", "Bis Montag"],
+          answer: 0,
+          explanation: "Maria soll bis Donnerstag Bescheid sagen."
+        }
+      ]
+    },
+    {
+      title: "9. Deutsch lernen",
+      topic: "Bildung",
+      text: "Ich lerne seit zwei Jahren Deutsch. Am Anfang war die Grammatik sehr schwierig für mich. Jetzt verstehe ich schon viele Gespräche und kann einfache Texte schreiben. Jeden Abend höre ich einen deutschen Podcast. Mein Ziel ist es, nächstes Jahr in Deutschland zu studieren.",
+      questions: [
+        {
+          q: "Wie lange lernt die Person Deutsch?",
+          options: ["Seit einem Jahr", "Seit zwei Jahren", "Seit drei Jahren"],
+          answer: 1,
+          explanation: "Die Person lernt seit zwei Jahren Deutsch."
+        },
+        {
+          q: "Was war am Anfang schwierig?",
+          options: ["Die Grammatik", "Das Essen", "Die Aussprache der englischen Sprache"],
+          answer: 0,
+          explanation: "Am Anfang war die Grammatik schwierig."
+        },
+        {
+          q: "Was möchte die Person nächstes Jahr machen?",
+          options: ["In Frankreich arbeiten", "Zu Hause bleiben", "In Deutschland studieren"],
+          answer: 2,
+          explanation: "Die Person möchte nächstes Jahr in Deutschland studieren."
+        }
+      ]
+    },
+    {
+      title: "10. Im Restaurant",
+      topic: "Essen",
+      text: "Guten Abend. Haben Sie schon gewählt? Ja, ich hätte gern die Gemüsesuppe und danach den Fisch mit Kartoffeln. Was möchten Sie trinken? Ein Glas Wasser, bitte. Möchten Sie auch ein Dessert? Nein danke, ich bin schon satt. Können Sie mir bitte die Rechnung bringen?",
+      questions: [
+        {
+          q: "Was bestellt die Person als Vorspeise?",
+          options: ["Salat", "Gemüsesuppe", "Brot"],
+          answer: 1,
+          explanation: "Die Person bestellt eine Gemüsesuppe."
+        },
+        {
+          q: "Was trinkt die Person?",
+          options: ["Einen Kaffee", "Einen Saft", "Ein Glas Wasser"],
+          answer: 2,
+          explanation: "Die Person möchte ein Glas Wasser."
+        },
+        {
+          q: "Warum bestellt die Person kein Dessert?",
+          options: ["Sie ist schon satt.", "Sie hat keine Zeit.", "Das Restaurant ist geschlossen."],
+          answer: 0,
+          explanation: "Die Person ist schon satt."
+        }
+      ]
+    }
+  ];
+
+  const style = document.createElement("style");
+  style.id = "b1ListeningTrainerStyle";
+  style.textContent = `
+    #b1ListeningTrainer {
+      margin: 25px auto;
+      padding: 20px;
+      max-width: 1000px;
+      border-radius: 20px;
+      background: linear-gradient(135deg,#e0f2fe,#f0f9ff);
+      color: #123047;
+      font-family: Arial,sans-serif;
+    }
+    #b1ListeningTrainer .listenCard {
+      background: white;
+      padding: 18px;
+      margin: 15px 0;
+      border-radius: 16px;
+      box-shadow: 0 3px 10px rgba(0,0,0,.07);
+    }
+    #b1ListeningTrainer button {
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin: 5px;
+      background: #1675c5;
+      color: white;
+      font-weight: bold;
+    }
+    #b1ListeningTrainer button:hover {
+      opacity: .85;
+    }
+    #b1ListeningTrainer .listenOption {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: #f1f5f9;
+      color: #123047;
+      border: 1px solid #dbe3ed;
+      margin: 7px 0;
+    }
+    #b1ListeningTrainer .listenOption.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    #b1ListeningTrainer .listenOption.wrong {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    #b1ListeningTrainer .listenTranscript {
+      display: none;
+      background: #f8fafc;
+      padding: 12px;
+      border-left: 4px solid #1675c5;
+      border-radius: 8px;
+      margin-top: 10px;
+      line-height: 1.7;
+    }
+    #b1ListeningTrainer .listenFeedback {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    #b1ListeningTrainer .listenQuestion {
+      margin: 15px 0;
+      padding: 12px;
+      border-radius: 10px;
+      background: #f8fafc;
+    }
+    #b1ListeningTrainer .listenSmall {
+      color: #52677a;
+      font-size: 13px;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const section = document.createElement("section");
+  section.id = "b1ListeningTrainer";
+
+  section.innerHTML = `
+    <h2>🎧 B1 Listening Trainer – Hörtraining</h2>
+    <p>Listen carefully, understand the situation, and answer the questions.</p>
+    <p class="listenSmall">You can listen more than once. Try answering before you reveal the transcript.</p>
+    <div id="b1ListenScore">
+      <strong>Score: 0 / 0</strong>
+    </div>
+    <div id="b1ListenExercises"></div>
+  `;
+
+  const container = section.querySelector("#b1ListenExercises");
+  let totalCorrect = 0;
+  let totalAnswered = 0;
+  let activeExercise = 0;
+
+  function updateScore() {
+    section.querySelector("#b1ListenScore").innerHTML =
+      "<strong>Score: " + totalCorrect + " / " + totalAnswered + "</strong>";
+  }
+
+  function stopAudio() {
+    if ("speechSynthesis" in window) {
+      speechSynthesis.cancel();
+    }
+  }
+
+  function playAudio(text) {
+    stopAudio();
+
+    if (!("speechSynthesis" in window)) {
+      alert("Your browser does not support German audio.");
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "de-DE";
+    utter.rate = 0.85;
+    utter.pitch = 1;
+
+    const voices = speechSynthesis.getVoices();
+    const germanVoice = voices.find(v => v.lang.toLowerCase().startsWith("de"));
+
+    if (germanVoice) {
+      utterance.voice = germanVoice;
+    }
+
+    speechSynthesis.speak(utterance);
+  }
+
+  function renderExercises() {
+    container.innerHTML = "";
+
+    listeningData.forEach((exercise, exerciseIndex) => {
+      const card = document.createElement("div");
+      card.className = "listenCard";
+
+      card.innerHTML = `
+        <h3>${exercise.title}</h3>
+        <p class="listenSmall">Topic: ${exercise.topic}</p>
+        <button class="playListenBtn">🔊 Play Audio</button>
+        <button class="repeatListenBtn">🔁 Listen Again</button>
+        <button class="transcriptListenBtn">📖 Show Transcript</button>
+        <div class="listenTranscript">${exercise.text}</div>
+        <div class="listenQuestions"></div>
+      `;
+
+      card.querySelector(".playListenBtn").onclick = () => {
+        activeExercise = exerciseIndex;
+        playAudio(exercise.text);
+      };
+
+      card.querySelector(".repeatListenBtn").onclick = () => {
+        activeExercise = exerciseIndex;
+        playAudio(exercise.text);
+      };
+
+      card.querySelector(".transcriptListenBtn").onclick = function () {
+        const transcript = card.querySelector(".listenTranscript");
+        const visible = transcript.style.display === "block";
+        transcript.style.display = visible ? "none" : "block";
+        this.textContent = visible ? "📖 Show Transcript" : "📖 Hide Transcript";
+      };
+
+      const questionsContainer = card.querySelector(".listenQuestions");
+
+      exercise.questions.forEach((question, questionIndex) => {
+        const questionDiv = document.createElement("div");
+        questionDiv.className = "listenQuestion";
+
+        questionDiv.innerHTML = `
+          <p><strong>${questionIndex + 1}. ${question.q}</strong></p>
+          <div class="listenOptions"></div>
+          <div class="listenFeedback"></div>
+        `;
+
+        const optionsContainer = questionDiv.querySelector(".listenOptions");
+        const feedback = questionDiv.querySelector(".listenFeedback");
+        let answered = false;
+
+        question.options.forEach((option, optionIndex) => {
+          const button = document.createElement("button");
+          button.className = "listenOption";
+          button.textContent = option;
+
+          button.onclick = function () {
+            if (answered) return;
+            answered = true;
+
+            totalAnswered++;
+
+            if (optionIndex === question.answer) {
+              totalCorrect++;
+              button.classList.add("correct");
+              feedback.innerHTML = "✅ Correct! " + question.explanation;
+            } else {
+              button.classList.add("wrong");
+              feedback.innerHTML =
+                "❌ Incorrect. Correct answer: " +
+                question.options[question.answer] +
+                ". " + question.explanation;
+            }
+
+            Array.from(optionsContainer.children).forEach((btn, i) => {
+              btn.disabled = true;
+              if (i === question.answer) {
+                btn.classList.add("correct");
+              }
+            });
+
+            updateScore();
+          };
+
+          optionsContainer.appendChild(button);
+        });
+
+        questionsContainer.appendChild(questionDiv);
+      });
+
+      container.appendChild(card);
+    });
+  }
+
+  renderExercises();
+
+  const home = document.getElementById("home");
+  const grammar = document.getElementById("b1GrammarTrainer");
+  const vocabulary = document.getElementById("b1VocabularyTrainer");
+
+  if (grammar && grammar.parentNode) {
+    grammar.parentNode.insertBefore(section, grammar.nextSibling);
+  } else if (vocabulary && vocabulary.parentNode) {
+    vocabulary.parentNode.insertBefore(section, vocabulary.nextSibling);
+  } else if (home) {
+    home.appendChild(section);
+  } else {
+    document.body.appendChild(section);
+  }
+})();
+ /* ==========================================
+   MEIN-DEUTSCH-B1 - WRITING TRAINER
+========================================== */
+
+(function () {
+  if (document.getElementById("b1WritingTrainer")) return;
+
+  const writingTasks = [
+    {
+      title: "1. Einladung zum Geburtstag",
+      type: "Informelle E-Mail",
+      situation: "Ein Freund hat Geburtstag und du möchtest ihn besuchen.",
+      instructions: [
+        "Schreibe, dass du dich über die Einladung freust.",
+        "Frage nach der Uhrzeit und dem Ort.",
+        "Schlage vor, etwas mitzubringen."
+      ],
+      phrases: [
+        "Vielen Dank für deine Einladung.",
+        "Ich freue mich sehr darauf.",
+        "Wann beginnt die Feier?",
+        "Soll ich etwas mitbringen?"
+      ],
+      sample: `Lieber Paul,
+
+vielen Dank für deine Einladung zu deinem Geburtstag. Ich freue mich sehr, dass du mich eingeladen hast. Natürlich komme ich gerne!
+
+Wann beginnt die Feier und wo findet sie statt? Soll ich etwas zu essen oder zu trinken mitbringen? Ich könnte einen Kuchen backen oder einen Salat machen.
+
+Ich freue mich darauf, dich und die anderen Freunde wiederzusehen. Wir werden bestimmt viel Spaß haben.
+
+Bis bald!
+
+Liebe Grüße
+Anna`
+    },
+    {
+      title: "2. Einen Termin verschieben",
+      type: "Formelle E-Mail",
+      situation: "Du hast einen Termin bei einer Sprachschule, aber du kannst nicht kommen.",
+      instructions: [
+        "Erkläre, warum du nicht kommen kannst.",
+        "Entschuldige dich.",
+        "Bitte um einen neuen Termin."
+      ],
+      phrases: [
+        "Sehr geehrte Damen und Herren,",
+        "Leider kann ich den Termin nicht wahrnehmen.",
+        "Ich möchte mich dafür entschuldigen.",
+        "Könnten Sie mir einen neuen Termin anbieten?"
+      ],
+      sample: `Sehr geehrte Damen und Herren,
+
+ich habe am Mittwoch um 10 Uhr einen Termin bei Ihnen. Leider kann ich diesen Termin nicht wahrnehmen, weil ich einen wichtigen Termin bei der Arbeit habe.
+
+Es tut mir leid, dass ich den Termin verschieben muss. Könnten Sie mir bitte einen neuen Termin am Freitag oder nächste Woche anbieten?
+
+Vielen Dank für Ihr Verständnis. Ich freue mich auf Ihre Antwort.
+
+Mit freundlichen Grüßen
+Maria Schmidt`
+    },
+    {
+      title: "3. Eine Beschwerde schreiben",
+      type: "Beschwerde-E-Mail",
+      situation: "Du hast online ein Handy gekauft, aber es funktioniert nicht richtig.",
+      instructions: [
+        "Beschreibe, wann und wo du das Handy gekauft hast.",
+        "Erkläre das Problem.",
+        "Bitte um Reparatur oder Ersatz."
+      ],
+      phrases: [
+        "Ich schreibe Ihnen, weil ...",
+        "Leider funktioniert das Produkt nicht.",
+        "Das Problem ist, dass ...",
+        "Ich bitte Sie um eine Lösung."
+      ],
+      sample: `Sehr geehrte Damen und Herren,
+
+ich schreibe Ihnen, weil ich vor einer Woche ein Handy in Ihrem Online-Shop gekauft habe. Leider funktioniert das Handy nicht richtig. Der Akku ist sehr schnell leer und manchmal schaltet sich das Gerät einfach aus.
+
+Ich bin mit dem Produkt nicht zufrieden, weil ich viel Geld dafür bezahlt habe. Ich möchte Sie deshalb bitten, das Handy zu reparieren oder mir ein neues Gerät zu schicken.
+
+Vielen Dank für Ihre Hilfe.
+
+Mit freundlichen Grüßen
+Peter Müller`
+    },
+    {
+      title: "4. Einen Freund um Hilfe bitten",
+      type: "Informelle E-Mail",
+      situation: "Du ziehst nächste Woche um und möchtest einen Freund um Hilfe bitten.",
+      instructions: [
+        "Erkläre, wann du umziehst.",
+        "Bitte um Hilfe.",
+        "Schreibe, wie du dich bedanken möchtest."
+      ],
+      phrases: [
+        "Ich ziehe nächste Woche um.",
+        "Kannst du mir vielleicht helfen?",
+        "Wir könnten zusammen ...",
+        "Als Dank lade ich dich zum Essen ein."
+      ],
+      sample: `Hallo Lukas,
+
+wie geht es dir? Ich hoffe, alles ist gut. Ich wollte dir erzählen, dass ich nächste Woche in eine neue Wohnung umziehe.
+
+Der Umzug ist am Samstag und ich habe viele Möbel und Kartons. Könntest du mir vielleicht helfen? Wir könnten um 9 Uhr anfangen und zusammen die Sachen transportieren.
+
+Als Dank möchte ich dich am Abend zum Essen einladen. Ich würde mich sehr freuen, wenn du Zeit hast.
+
+Viele Grüße
+David`
+    },
+    {
+      title: "5. Meinung zum Thema Sport",
+      type: "Meinungsbeitrag",
+      situation: "In einem Internetforum diskutieren Menschen über Sport im Alltag.",
+      instructions: [
+        "Schreibe deine Meinung über Sport.",
+        "Erkläre, warum Sport wichtig oder nicht wichtig ist.",
+        "Erzähle, wie du selbst Sport machst."
+      ],
+      phrases: [
+        "Meiner Meinung nach ...",
+        "Ich finde, dass ...",
+        "Ein Vorteil ist, dass ...",
+        "Außerdem ...",
+        "Zum Beispiel ..."
+      ],
+      sample: `Meiner Meinung nach ist Sport sehr wichtig für unsere Gesundheit. Wenn man regelmäßig Sport macht, bleibt man fit und fühlt sich besser.
+
+Ein Vorteil ist, dass Sport Stress reduzieren kann. Außerdem kann man beim Sport neue Freunde kennenlernen. Man muss nicht unbedingt ins Fitnessstudio gehen. Man kann auch zu Hause trainieren oder spazieren gehen.
+
+Ich persönlich gehe dreimal pro Woche spazieren und mache am Wochenende manchmal Fußball mit Freunden. Ich finde, jeder sollte eine Sportart finden, die ihm Spaß macht.`
+    },
+    {
+      title: "6. Informationen über einen Kurs fragen",
+      type: "Formelle E-Mail",
+      situation: "Du möchtest einen Deutschkurs besuchen und schreibst an eine Sprachschule.",
+      instructions: [
+        "Frage nach dem Beginn des Kurses.",
+        "Frage nach den Kosten.",
+        "Frage nach den Unterrichtszeiten."
+      ],
+      phrases: [
+        "Ich interessiere mich für Ihren Deutschkurs.",
+        "Ich möchte gerne wissen, ob ...",
+        "Wie viel kostet der Kurs?",
+        "Könnten Sie mir bitte weitere Informationen schicken?"
+      ],
+      sample: `Sehr geehrte Damen und Herren,
+
+ich interessiere mich für Ihren Deutschkurs und möchte gerne weitere Informationen bekommen.
+
+Könnten Sie mir bitte sagen, wann der nächste Kurs beginnt? Außerdem möchte ich wissen, wie viel der Kurs kostet und wie oft pro Woche der Unterricht stattfindet.
+
+Ich arbeite am Vormittag und kann deshalb nur am Nachmittag oder am Abend teilnehmen. Gibt es einen Kurs zu dieser Zeit?
+
+Vielen Dank im Voraus für Ihre Antwort.
+
+Mit freundlichen Grüßen
+Sarah`
+    },
+    {
+      title: "7. Einen Ausflug planen",
+      type: "Informelle E-Mail",
+      situation: "Du möchtest am Wochenende mit Freunden einen Ausflug machen.",
+      instructions: [
+        "Schlage einen Ort vor.",
+        "Schreibe, wie ihr dorthin fahren könnt.",
+        "Schlage Aktivitäten und eine Uhrzeit vor."
+      ],
+      phrases: [
+        "Wie wäre es, wenn wir ...?",
+        "Ich schlage vor, dass ...",
+        "Wir könnten mit dem Bus fahren.",
+        "Was hältst du davon?"
+      ],
+      sample: `Hallo zusammen,
+
+ich habe eine Idee für unser Wochenende. Wie wäre es, wenn wir am Samstag einen Ausflug zum See machen?
+
+Wir könnten mit dem Bus fahren, weil es günstiger und besser für die Umwelt ist. Dort können wir spazieren gehen, Fotos machen und zusammen etwas essen.
+
+Ich schlage vor, dass wir uns um 8 Uhr am Busbahnhof treffen. Bitte bringt etwas zu trinken und eine Kleinigkeit zu essen mit.
+
+Was haltet ihr von meiner Idee? Ich freue mich auf eure Antworten.
+
+Liebe Grüße
+Alex`
+    },
+    {
+      title: "8. Über das Leben in der Stadt schreiben",
+      type: "Meinungsbeitrag",
+      situation: "Du sollst über die Vorteile und Nachteile des Lebens in einer großen Stadt schreiben.",
+      instructions: [
+        "Nenne Vorteile des Stadtlebens.",
+        "Nenne auch Nachteile.",
+        "Schreibe, wo du lieber wohnen möchtest und warum."
+      ],
+      phrases: [
+        "Einerseits ... andererseits ...",
+        "Ein großer Vorteil ist ...",
+        "Ein Nachteil ist ...",
+        "Ich würde lieber ...",
+        "Deshalb ..."
+      ],
+      sample: `Das Leben in einer großen Stadt hat viele Vorteile, aber auch Nachteile. Einerseits gibt es viele Arbeitsplätze, Geschäfte und Freizeitangebote. Außerdem kann man mit öffentlichen Verkehrsmitteln fast überall hinfahren.
+
+Andererseits sind die Städte oft laut und die Mieten sehr teuer. Manchmal gibt es auch viel Verkehr und wenig Natur.
+
+Ich persönlich würde lieber in einer kleineren Stadt wohnen, weil es dort ruhiger ist. Trotzdem möchte ich nicht zu weit von einer großen Stadt entfernt sein, damit ich gute Möglichkeiten für Arbeit und Freizeit habe.`
+    },
+    {
+      title: "9. Eine Reise beschreiben",
+      type: "Informelle E-Mail",
+      situation: "Du bist gerade von einer Reise zurückgekommen und schreibst einem Freund.",
+      instructions: [
+        "Schreibe, wohin du gereist bist.",
+        "Erzähle, was du dort gemacht hast.",
+        "Beschreibe, was dir besonders gefallen hat."
+      ],
+      phrases: [
+        "Ich bin gerade von ... zurückgekommen.",
+        "Die Reise war sehr interessant.",
+        "Besonders gut hat mir ... gefallen.",
+        "Wir haben ... besucht.",
+        "Ich möchte gerne wieder dorthin reisen."
+      ],
+      sample: `Liebe Emma,
+
+ich bin gerade von meiner Reise nach München zurückgekommen. Die Reise war wirklich schön und ich habe viel erlebt.
+
+Ich habe die Stadt besichtigt, viele Fotos gemacht und verschiedene Restaurants besucht. Besonders gut hat mir der große Park gefallen, weil man dort spazieren gehen und sich entspannen kann.
+
+Das Wetter war meistens sonnig, deshalb konnten wir viel draußen machen. Ich habe auch neue Leute kennengelernt.
+
+Ich möchte gerne wieder nach München reisen. Vielleicht können wir nächstes Mal zusammen fahren!
+
+Liebe Grüße
+Lisa`
+    },
+    {
+      title: "10. Gesunde Ernährung",
+      type: "Meinungsbeitrag",
+      situation: "Menschen diskutieren darüber, ob gesunde Ernährung im Alltag wichtig ist.",
+      instructions: [
+        "Schreibe, warum gesunde Ernährung wichtig ist.",
+        "Nenne Beispiele für gesundes Essen.",
+        "Erzähle, wie du dich ernährst."
+      ],
+      phrases: [
+        "Ich bin der Meinung, dass ...",
+        "Gesunde Ernährung ist wichtig, weil ...",
+        "Man sollte mehr ... essen.",
+        "Ich versuche, ...",
+        "Es ist wichtig, dass ..."
+      ],
+      sample: `Ich bin der Meinung, dass gesunde Ernährung sehr wichtig ist. Wenn wir gesund essen, bekommen wir genug Energie und können uns besser konzentrieren.
+
+Man sollte mehr Obst, Gemüse und Wasser zu sich nehmen. Außerdem ist es besser, nicht zu viel Zucker und Fast Food zu essen.
+
+Ich selbst versuche, jeden Tag Gemüse und Obst zu essen. Manchmal esse ich aber auch Süßigkeiten, besonders am Wochenende. Ich finde, man sollte gesund essen, aber auch genießen dürfen.
+
+Eine gute Ernährung hilft uns, gesund und fit zu bleiben.`
+    }
+  ];
+
+  const style = document.createElement("style");
+  style.id = "b1WritingTrainerStyle";
+  style.textContent = `
+    #b1WritingTrainer {
+      max-width: 1000px;
+      margin: 25px auto;
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(135deg,#fef3c7,#fff7ed);
+      color: #3b2b12;
+      font-family: Arial,sans-serif;
+    }
+    #b1WritingTrainer .writingCard {
+      background: white;
+      padding: 18px;
+      border-radius: 16px;
+      margin: 15px 0;
+    }
+    #b1WritingTrainer button,
+    #b1WritingTrainer select {
+      padding: 10px 14px;
+      margin: 6px 4px;
+      border-radius: 10px;
+      border: 1px solid #d6c6a4;
+      cursor: pointer;
+    }
+    #b1WritingTrainer button {
+      background: #9a5b14;
+      color: white;
+      font-weight: bold;
+    }
+    #b1WritingTrainer textarea {
+      width: 100%;
+      min-height: 240px;
+      box-sizing: border-box;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #d6c6a4;
+      font-size: 16px;
+      line-height: 1.7;
+      resize: vertical;
+    }
+    #b1WritingTrainer .writingInfo {
+      background: #fffaf0;
+      padding: 12px;
+      border-radius: 10px;
+      margin: 10px 0;
+      line-height: 1.7;
+    }
+    #b1WritingTrainer .writingSample {
+      display: none;
+      white-space: pre-wrap;
+      background: #f0fdf4;
+      padding: 15px;
+      border-radius: 10px;
+      border-left: 4px solid #22c55e;
+      line-height: 1.7;
+      margin-top: 12px;
+    }
+    #b1WritingTrainer .writingPhrase {
+      display: inline-block;
+      background: #fef3c7;
+      padding: 5px 8px;
+      margin: 4px;
+      border-radius: 6px;
+    }
+    #b1WritingTrainer .writingStats {
+      font-weight: bold;
+      margin: 10px 0;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const section = document.createElement("section");
+  section.id = "b1WritingTrainer";
+
+  section.innerHTML = `
+    <h2>✍️ B1 Writing Trainer – Schreiben</h2>
+    <p>Practice writing German emails and opinions. Write your own answer before reading the example.</p>
+
+    <div class="writingCard">
+      <label><strong>Choose a writing task:</strong></label>
+      <select id="b1WritingSelect"></select>
+      <div id="b1WritingTask"></div>
+    </div>
+  `;
+
+  const select = section.querySelector("#b1WritingSelect");
+  const taskContainer = section.querySelector("#b1WritingTask");
+
+  writingTasks.forEach((task, index) => {
+    const option = document.createElement("option");
+    option.value = index;
+    option.textContent = task.title;
+    select.appendChild(option);
+  });
+
+  function renderTask(index) {
+    const task = writingTasks[index];
+    const storageKey = "meinDeutschB1Writing_" + index;
+
+    taskContainer.innerHTML = `
+      <div class="writingInfo">
+        <strong>Task type:</strong> ${task.type}<br>
+        <strong>Situation:</strong> ${task.situation}
+        <p><strong>Your instructions:</strong></p>
+        <ul>
+          ${task.instructions.map(item => `<li>${item}</li>`).join("")}
+        </ul>
+      </div>
+
+      <div>
+        <strong>Useful phrases:</strong><br>
+        ${task.phrases.map(phrase => `<span class="writingPhrase">${phrase}</span>`).join("")}
+      </div>
+
+      <h3>Your answer</h3>
+      <textarea id="b1WritingAnswer" placeholder="Schreibe deine Antwort hier auf Deutsch..."></textarea>
+      <div class="writingStats" id="b1WritingStats">Words: 0 | Characters: 0</div>
+
+      <button id="b1WritingSave">💾 Save My Answer</button>
+      <button id="b1WritingClear">🗑️ Clear</button>
+      <button id="b1WritingReveal">📖 Show Sample Answer</button>
+
+      <div class="writingSample" id="b1WritingSample"></div>
+    `;
+
+    const textarea = taskContainer.querySelector("#b1WritingAnswer");
+    const stats = taskContainer.querySelector("#b1WritingStats");
+    const sample = taskContainer.querySelector("#b1WritingSample");
+    const saveButton = taskContainer.querySelector("#b1WritingSave");
+    const clearButton = taskContainer.querySelector("#b1WritingClear");
+    const revealButton = taskContainer.querySelector("#b1WritingReveal");
+
+    textarea.value = localStorage.getItem(storageKey) || "";
+
+    function updateStats() {
+      const text = textarea.value.trim();
+      const words = text ? text.split(/\s+/).length : 0;
+      stats.textContent = "Words: " + words + " | Characters: " + textarea.value.length;
+    }
+
+    textarea.addEventListener("input", updateStats);
+    updateStats();
+
+    saveButton.onclick = function () {
+      localStorage.setItem(storageKey, textarea.value);
+      alert("Your writing has been saved!");
+    };
+
+    clearButton.onclick = function () {
+      if (confirm("Do you want to clear your writing for this task?")) {
+        textarea.value = "";
+        localStorage.removeItem(storageKey);
+        updateStats();
+      }
+    };
+
+    revealButton.onclick = function () {
+      const visible = sample.style.display === "block";
+      sample.style.display = visible ? "none" : "block";
+      sample.textContent = task.sample;
+      revealButton.textContent = visible
+        ? "📖 Show Sample Answer"
+        : "📖 Hide Sample Answer";
+    };
+  }
+
+  select.onchange = function () {
+    renderTask(Number(this.value));
+  };
+
+  renderTask(0);
+
+  const listening = document.getElementById("b1ListeningTrainer");
+  const grammar = document.getElementById("b1GrammarTrainer");
+  const home = document.getElementById("home");
+
+  if (listening && listening.parentNode) {
+    listening.parentNode.insertBefore(section, listening.nextSibling);
+  } else if (grammar && grammar.parentNode) {
+    grammar.parentNode.insertBefore(section, grammar.nextSibling);
+  } else if (home) {
+    home.appendChild(section);
+  } else {
+    document.body.appendChild(section);
+  }
+})();
+  /* ==========================================
+   MEIN-DEUTSCH-B1 - SPEAKING TRAINER
+========================================== */
+
+(function () {
+  if (document.getElementById("b1SpeakingTrainer")) return;
+
+  const speakingTopics = [
+    {
+      title: "Gemeinsam einen Ausflug planen",
+      part: "Teil 1 – Gemeinsam planen",
+      situation: "Ihr möchtet am Wochenende einen Ausflug machen. Plant gemeinsam.",
+      points: ["Wohin fahren?", "Wann treffen?", "Wie fahren?", "Was mitbringen?", "Was machen?"],
+      presentation: "Planen Sie einen Ausflug mit Freunden. Sprechen Sie über den Ort, die Zeit, die Verkehrsmittel und die Aktivitäten.",
+      questions: ["Wohin möchten Sie fahren?", "Was machen Sie gern am Wochenende?", "Reisen Sie lieber allein oder mit Freunden? Warum?"]
+    },
+    {
+      title: "Gesund und fit bleiben",
+      part: "Teil 2 – Präsentation",
+      situation: "Sprechen Sie über das Thema Gesundheit.",
+      points: ["Gesundheit ist wichtig", "Sport im Alltag", "Gesunde Ernährung", "Ihre eigenen Erfahrungen", "Ihre Meinung"],
+      presentation: "Wie kann man gesund und fit bleiben? Sprechen Sie über Sport, Ernährung und Ihre persönlichen Erfahrungen.",
+      questions: ["Wie oft machen Sie Sport?", "Was essen Sie gern?", "Was machen Sie, wenn Sie krank sind?"]
+    },
+    {
+      title: "Eine Geburtstagsparty organisieren",
+      part: "Teil 1 – Gemeinsam planen",
+      situation: "Ein Freund hat Geburtstag. Ihr möchtet eine Party organisieren.",
+      points: ["Wo feiern?", "Wann feiern?", "Essen und Getränke", "Musik", "Gäste einladen"],
+      presentation: "Planen Sie zusammen eine Geburtstagsparty und sprechen Sie über die Organisation.",
+      questions: ["Feiern Sie gern Ihren Geburtstag?", "Was machen Sie normalerweise an Ihrem Geburtstag?", "Welche Geschenke finden Sie schön?"]
+    },
+    {
+      title: "Lernen mit dem Internet",
+      part: "Teil 2 – Präsentation",
+      situation: "Sprechen Sie über das Lernen im Internet.",
+      points: ["Online lernen", "Vorteile", "Nachteile", "Ihre Erfahrungen", "Ihre Meinung"],
+      presentation: "Kann man gut mit dem Internet lernen? Sprechen Sie über Vorteile, Nachteile und Ihre Erfahrungen.",
+      questions: ["Lernen Sie manchmal online?", "Welche Internetseiten benutzen Sie zum Lernen?", "Lernen Sie lieber allein oder in einer Gruppe?"]
+    },
+    {
+      title: "Einen Filmabend planen",
+      part: "Teil 1 – Gemeinsam planen",
+      situation: "Ihr möchtet mit Freunden einen Filmabend machen.",
+      points: ["Welcher Film?", "Wo treffen?", "Uhrzeit", "Snacks und Getränke", "Wer bringt was mit?"],
+      presentation: "Planen Sie einen Filmabend mit Freunden.",
+      questions: ["Welche Filme sehen Sie gern?", "Sehen Sie Filme lieber zu Hause oder im Kino?", "Wie oft schauen Sie Filme?"]
+    },
+    {
+      title: "Leben in der Stadt oder auf dem Land",
+      part: "Teil 2 – Präsentation",
+      situation: "Sprechen Sie darüber, wo Sie lieber leben möchten.",
+      points: ["Leben in der Stadt", "Leben auf dem Land", "Vorteile", "Nachteile", "Ihre persönliche Wahl"],
+      presentation: "Wo möchten Sie lieber leben: in einer Stadt oder auf dem Land? Vergleichen Sie beide Möglichkeiten und erzählen Sie von Ihren Erfahrungen.",
+      questions: ["Wo wohnen Sie jetzt?", "Was gefällt Ihnen an Ihrem Wohnort?", "Ist das Leben in der Stadt teuer?"]
+    },
+    {
+      title: "Gemeinsam Deutsch lernen",
+      part: "Teil 1 – Gemeinsam planen",
+      situation: "Ihr möchtet zusammen Deutsch lernen und euch auf eine Prüfung vorbereiten.",
+      points: ["Wann lernen?", "Wo lernen?", "Welche Materialien?", "Wie üben?", "Pausen planen"],
+      presentation: "Planen Sie gemeinsam eine Lernwoche zur Vorbereitung auf eine Deutschprüfung.",
+      questions: ["Wie lernen Sie neue Wörter?", "Was ist für Sie schwierig auf Deutsch?", "Wie üben Sie das Sprechen?"]
+    },
+    {
+      title: "Öffentliche Verkehrsmittel",
+      part: "Teil 2 – Präsentation",
+      situation: "Sprechen Sie über Bus, Zug und andere öffentliche Verkehrsmittel.",
+      points: ["Bus und Zug", "Vorteile", "Nachteile", "Ihre Erfahrungen", "Ihre Meinung"],
+      presentation: "Welche Vorteile und Nachteile haben öffentliche Verkehrsmittel? Sprechen Sie auch über Ihre eigenen Erfahrungen.",
+      questions: ["Wie fahren Sie normalerweise zur Arbeit oder zur Schule?", "Ist der öffentliche Verkehr in Ihrer Stadt gut?", "Würden Sie lieber mit dem Fahrrad fahren?"]
+    },
+    {
+      title: "Ein Geschenk für einen Freund",
+      part: "Teil 1 – Gemeinsam planen",
+      situation: "Ein Freund hat eine neue Arbeit gefunden. Ihr möchtet ihm ein Geschenk machen.",
+      points: ["Was schenken?", "Wie viel kostet es?", "Wo kaufen?", "Wann geben?", "Eine Karte schreiben"],
+      presentation: "Planen Sie gemeinsam ein Geschenk für einen Freund.",
+      questions: ["Was schenken Sie Ihren Freunden?", "Was war das schönste Geschenk, das Sie bekommen haben?", "Ist es besser, praktische oder persönliche Geschenke zu machen?"]
+    },
+    {
+      title: "Umwelt schützen",
+      part: "Teil 2 – Präsentation",
+      situation: "Sprechen Sie darüber, wie man die Umwelt schützen kann.",
+      points: ["Müll vermeiden", "Wasser sparen", "Verkehr", "Ihre Erfahrungen", "Ihre Meinung"],
+      presentation: "Was können Menschen im Alltag für die Umwelt tun? Sprechen Sie über verschiedene Möglichkeiten und Ihre Erfahrungen.",
+      questions: ["Trennen Sie Ihren Müll?", "Wie kommen Sie normalerweise zur Arbeit?", "Was kann Ihre Stadt für die Umwelt tun?"]
+    },
+    {
+      title: "Eine Reise planen",
+      part: "Teil 1 – Gemeinsam planen",
+      situation: "Ihr möchtet gemeinsam eine Reise machen.",
+      points: ["Reiseziel", "Verkehrsmittel", "Unterkunft", "Aktivitäten", "Kosten"],
+      presentation: "Planen Sie gemeinsam eine Reise und sprechen Sie über die wichtigsten Details.",
+      questions: ["Wohin reisen Sie gern?", "Reisen Sie lieber mit dem Bus oder mit dem Flugzeug?", "Was nehmen Sie auf Reisen mit?"]
+    },
+    {
+      title: "Arbeit und Freizeit",
+      part: "Teil 2 – Präsentation",
+      situation: "Sprechen Sie darüber, wie wichtig Freizeit neben der Arbeit ist.",
+      points: ["Arbeit", "Freizeit", "Stress", "Hobbys", "Ihre Meinung"],
+      presentation: "Warum ist Freizeit wichtig? Sprechen Sie über die Balance zwischen Arbeit und Freizeit und Ihre eigenen Erfahrungen.",
+      questions: ["Wie verbringen Sie Ihre Freizeit?", "Haben Sie genug Freizeit?", "Was machen Sie, wenn Sie Stress haben?"]
+    },
+    {
+      title: "Gemeinsam kochen",
+      part: "Teil 1 – Gemeinsam planen",
+      situation: "Ihr möchtet für Freunde zusammen kochen.",
+      points: ["Gericht auswählen", "Zutaten kaufen", "Einkaufen", "Zeit planen", "Wer macht was?"],
+      presentation: "Planen Sie gemeinsam ein Essen für Ihre Freunde.",
+      questions: ["Kochen Sie gern?", "Was ist Ihr Lieblingsessen?", "Essen Sie lieber zu Hause oder im Restaurant?"]
+    },
+    {
+      title: "Soziale Medien",
+      part: "Teil 2 – Präsentation",
+      situation: "Sprechen Sie über soziale Medien im Alltag.",
+      points: ["Welche sozialen Medien?", "Vorteile", "Nachteile", "Zeit", "Ihre Erfahrungen"],
+      presentation: "Welche Rolle spielen soziale Medien im Leben der Menschen? Sprechen Sie über Vorteile, Nachteile und Ihre Meinung.",
+      questions: ["Welche sozialen Medien benutzen Sie?", "Wie viel Zeit verbringen Sie im Internet?", "Kann man ohne soziale Medien leben?"]
+    },
+    {
+      title: "Eine Veranstaltung besuchen",
+      part: "Teil 1 – Gemeinsam planen",
+      situation: "Ihr möchtet am Wochenende eine Veranstaltung besuchen.",
+      points: ["Welche Veranstaltung?", "Datum", "Tickets", "Verkehrsmittel", "Treffpunkt"],
+      presentation: "Planen Sie gemeinsam den Besuch einer Veranstaltung, zum Beispiel ein Konzert, eine Ausstellung oder ein Sportereignis.",
+      questions: ["Welche Veranstaltungen besuchen Sie gern?", "Wann waren Sie zuletzt auf einem Konzert?", "Gehen Sie gern mit Freunden aus?"]
+    }
+  ];
+
+  const usefulPhrases = [
+    "Ich denke, dass ...",
+    "Meiner Meinung nach ...",
+    "Ich bin der Meinung, dass ...",
+    "Ich stimme dir zu.",
+    "Ich stimme dir nicht ganz zu.",
+    "Das ist eine gute Idee.",
+    "Was hältst du davon?",
+    "Wie wäre es, wenn wir ...?",
+    "Wir könnten ...",
+    "Vielleicht sollten wir ...",
+    "Ich schlage vor, dass ...",
+    "Ein Vorteil ist, dass ...",
+    "Ein Nachteil ist, dass ...",
+    "Zum Beispiel ...",
+    "Ich habe damit gute Erfahrungen gemacht.",
+    "Zuerst möchte ich über ... sprechen.",
+    "Jetzt komme ich zu meinem zweiten Punkt.",
+    "Zusammenfassend kann man sagen, dass ...",
+    "Vielen Dank fürs Zuhören.",
+    "Hast du noch eine Frage?"
+  ];
+
+  const style = document.createElement("style");
+  style.id = "b1SpeakingTrainerStyle";
+  style.textContent = `
+    #b1SpeakingTrainer {
+      max-width: 1000px;
+      margin: 25px auto;
+      padding: 20px;
+      background: linear-gradient(135deg,#ede9fe,#f5f3ff);
+      color: #30234f;
+      border-radius: 20px;
+      font-family: Arial,sans-serif;
+    }
+    #b1SpeakingTrainer .speakingCard {
+      background: white;
+      padding: 18px;
+      margin: 15px 0;
+      border-radius: 15px;
+    }
+    #b1SpeakingTrainer button,
+    #b1SpeakingTrainer select {
+      padding: 10px 14px;
+      margin: 5px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+    }
+    #b1SpeakingTrainer button {
+      background: #6d48c7;
+      color: white;
+      font-weight: bold;
+    }
+    #b1SpeakingTrainer .speakingTopic {
+      background: #f5f3ff;
+      border-left: 4px solid #8b5cf6;
+      padding: 15px;
+      border-radius: 10px;
+      line-height: 1.7;
+    }
+    #b1SpeakingTrainer .speakingTimer {
+      font-size: 35px;
+      font-weight: bold;
+      text-align: center;
+      margin: 15px;
+    }
+    #b1SpeakingTrainer .speakingPhrase {
+      display: inline-block;
+      padding: 7px;
+      background: #ede9fe;
+      border-radius: 7px;
+      margin: 4px;
+    }
+    #b1SpeakingTrainer .speakingChecklist label {
+      display: block;
+      padding: 9px;
+      margin: 5px 0;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    #b1SpeakingTrainer .speakingChecklist input {
+      margin-right: 8px;
+    }
+    #b1SpeakingTrainer .speakingNotes {
+      width: 100%;
+      min-height: 120px;
+      box-sizing: border-box;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd6fe;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const section = document.createElement("section");
+  section.id = "b1SpeakingTrainer";
+
+  section.innerHTML = `
+    <h2>🗣️ B1 Speaking Trainer – Sprechen</h2>
+    <p>Practice speaking German. Choose a topic or get a random one. Speak aloud and use the timer.</p>
+
+    <div class="speakingCard">
+      <label><strong>Choose a topic:</strong></label>
+      <select id="b1SpeakingSelect"></select>
+      <button id="b1SpeakingRandom">🎲 Random Topic</button>
+    </div>
+
+    <div class="speakingCard" id="b1SpeakingTask"></div>
+
+    <div class="speakingCard">
+      <h3>⏱️ Speaking Timer</h3>
+      <div class="speakingTimer" id="b1SpeakingTimer">02:00</div>
+      <button id="b1SpeakingStart">▶️ Start</button>
+      <button id="b1SpeakingPause">⏸️ Pause</button>
+      <button id="b1SpeakingReset">🔄 Reset</button>
+      <p>Use this timer to practice speaking without stopping.</p>
+    </div>
+
+    <div class="speakingCard">
+      <h3>💬 Useful B1 Speaking Phrases</h3>
+      <div id="b1SpeakingPhrases"></div>
+    </div>
+
+    <div class="speakingCard speakingChecklist">
+      <h3>✅ Self-Evaluation</h3>
+      <p>After speaking, check what you did well:</p>
+      <label><input type="checkbox"> I introduced the topic.</label>
+      <label><input type="checkbox"> I spoke in complete sentences.</label>
+      <label><input type="checkbox"> I used connectors (weil, deshalb, obwohl, außerdem).</label>
+      <label><input type="checkbox"> I gave examples.</label>
+      <label><input type="checkbox"> I expressed my opinion.</label>
+      <label><input type="checkbox"> I spoke for at least one minute.</label>
+      <label><input type="checkbox"> I answered the questions.</label>
+    </div>
+
+    <div class="speakingCard">
+      <h3>📝 My Speaking Notes</h3>
+      <p>Write a few keywords before you speak. Don't write a complete speech!</p>
+      <textarea class="speakingNotes" id="b1SpeakingNotes" placeholder="Meine Stichpunkte ..."></textarea>
+      <button id="b1SpeakingSaveNotes">💾 Save Notes</button>
+      <button id="b1SpeakingClearNotes">🗑️ Clear Notes</button>
+    </div>
+  `;
+
+  const select = section.querySelector("#b1SpeakingSelect");
+  const taskContainer = section.querySelector("#b1SpeakingTask");
+
+  speakingTopics.forEach((topic, index) => {
+    const option = document.createElement("option");
+    option.value = index;
+    option.textContent = topic.title;
+    select.appendChild(option);
+  });
+
+  function renderTopic(index) {
+    const topic = speakingTopics[index];
+
+    taskContainer.innerHTML = `
+      <h3>${topic.title}</h3>
+      <p><strong>${topic.part}</strong></p>
+      <div class="speakingTopic">
+        <p><strong>Situation:</strong> ${topic.situation}</p>
+        <p><strong>Ideas to discuss:</strong></p>
+        <ul>${topic.points.map(p => `<li>${p}</li>`).join("")}</ul>
+        <hr>
+        <p><strong>Practice task:</strong> ${topic.presentation}</p>
+        <h4>❓ Questions to practice</h4>
+        <ol>${topic.questions.map(q => `<li>${q}</li>`).join("")}</ol>
+      </div>
+    `;
+
+    section.querySelector("#b1SpeakingNotes").value =
+      localStorage.getItem("meinDeutschB1SpeakingNotes_" + index) || "";
+  }
+
+  select.onchange = function () {
+    renderTopic(Number(this.value));
+  };
+
+  section.querySelector("#b1SpeakingRandom").onclick = function () {
+    let current = Number(select.value);
+    let next = Math.floor(Math.random() * speakingTopics.length);
+
+    if (speakingTopics.length > 1 && next === current) {
+      next = (next + 1) % speakingTopics.length;
+    }
+
+    select.value = next;
+    renderTopic(next);
+  };
+
+  section.querySelector("#b1SpeakingSaveNotes").onclick = function () {
+    const index = Number(select.value);
+    const notes = section.querySelector("#b1SpeakingNotes").value;
+    localStorage.setItem("meinDeutschB1SpeakingNotes_" + index, notes);
+    alert("Your speaking notes have been saved!");
+  };
+
+  section.querySelector("#b1SpeakingClearNotes").onclick = function () {
+    if (confirm("Clear your notes for this topic?")) {
+      const index = Number(select.value);
+      section.querySelector("#b1SpeakingNotes").value = "";
+      localStorage.removeItem("meinDeutschB1SpeakingNotes_" + index);
+    }
+  };
+
+  section.querySelector("#b1SpeakingPhrases").innerHTML =
+    usefulPhrases.map(p => `<span class="speakingPhrase">${p}</span>`).join("");
+
+  let timerSeconds = 120;
+  let timerInterval = null;
+
+  function updateTimer() {
+    const minutes = Math.floor(timerSeconds / 60);
+    const seconds = timerSeconds % 60;
+    section.querySelector("#b1SpeakingTimer").textContent =
+      String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+  }
+
+  section.querySelector("#b1SpeakingStart").onclick = function () {
+    if (timerInterval !== null || timerSeconds <= 0) return;
+
+    timerInterval = setInterval(function () {
+      timerSeconds--;
+      updateTimer();
+
+      if (timerSeconds <= 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        alert("Time is up! Great job practicing German!");
+      }
+    }, 1000);
+  };
+
+  section.querySelector("#b1SpeakingPause").onclick = function () {
+    if (timerInterval !== null) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  };
+
+  section.querySelector("#b1SpeakingReset").onclick = function () {
+    if (timerInterval !== null) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    timerSeconds = 120;
+    updateTimer();
+  };
+
+  renderTopic(0);
+  updateTimer();
+
+  const writing = document.getElementById("b1WritingTrainer");
+  const listening = document.getElementById("b1ListeningTrainer");
+  const home = document.getElementById("home");
+
+  if (writing && writing.parentNode) {
+    writing.parentNode.insertBefore(section, writing.nextSibling);
+  } else if (listening && listening.parentNode) {
+    listening.parentNode.insertBefore(section, listening.nextSibling);
+  } else if (home) {
+    home.appendChild(section);
+  } else {
+    document.body.appendChild(section);
+  }
+})();
+  /* ==========================================
+   MEIN-DEUTSCH-B1 - DAILY VOCABULARY CHALLENGE
+========================================== */
+
+(function () {
+  if (document.getElementById("b1DailyChallenge")) return;
+
+  const words = [
+    { de: "die Entscheidung", en: "decision", example: "Ich muss heute eine Entscheidung treffen." },
+    { de: "die Erfahrung", en: "experience", example: "Ich habe viel Erfahrung gesammelt." },
+    { de: "die Möglichkeit", en: "possibility", example: "Ich habe die Möglichkeit, Deutsch zu lernen." },
+    { de: "die Umgebung", en: "environment / surroundings", example: "Die Umgebung ist sehr ruhig." },
+    { de: "sich bewerben", en: "to apply", example: "Ich möchte mich um eine Stelle bewerben." },
+    { de: "die Ausbildung", en: "training / vocational education", example: "Sie macht eine Ausbildung zur Krankenschwester." },
+    { de: "die Voraussetzung", en: "requirement", example: "Gute Deutschkenntnisse sind eine Voraussetzung." },
+    { de: "zuverlässig", en: "reliable", example: "Mein Kollege ist sehr zuverlässig." },
+    { de: "die Verantwortung", en: "responsibility", example: "Er trägt viel Verantwortung." },
+    { de: "die Veranstaltung", en: "event", example: "Am Wochenende gibt es eine Veranstaltung." },
+    { de: "die Gesundheit", en: "health", example: "Gesundheit ist sehr wichtig." },
+    { de: "sich erholen", en: "to recover / relax", example: "Am Wochenende erhole ich mich." },
+    { de: "die Ernährung", en: "nutrition / diet", example: "Eine gesunde Ernährung ist wichtig." },
+    { de: "vermeiden", en: "to avoid", example: "Ich möchte Stress vermeiden." },
+    { de: "die Bewegung", en: "movement / physical activity", example: "Bewegung ist gut für den Körper." },
+    { de: "die Unterkunft", en: "accommodation", example: "Wir suchen eine günstige Unterkunft." },
+    { de: "die Verspätung", en: "delay", example: "Der Zug hat zehn Minuten Verspätung." },
+    { de: "die Reise", en: "journey / trip", example: "Unsere Reise war sehr schön." },
+    { de: "reservieren", en: "to reserve", example: "Ich möchte einen Tisch reservieren." },
+    { de: "die Fahrkarte", en: "ticket", example: "Ich kaufe eine Fahrkarte nach Berlin." },
+    { de: "die Nachbarschaft", en: "neighborhood", example: "Meine Nachbarschaft ist freundlich." },
+    { de: "die Miete", en: "rent", example: "Die Miete ist leider sehr hoch." },
+    { de: "umziehen", en: "to move house", example: "Wir ziehen nächste Woche um." },
+    { de: "die Rechnung", en: "bill / invoice", example: "Können Sie mir die Rechnung bringen?" },
+    { de: "die Meinung", en: "opinion", example: "Meiner Meinung nach ist das richtig." },
+    { de: "die Nachricht", en: "message / news", example: "Ich habe eine Nachricht bekommen." },
+    { de: "teilnehmen", en: "to participate", example: "Ich nehme an einem Deutschkurs teil." },
+    { de: "die Lösung", en: "solution", example: "Wir suchen eine Lösung für das Problem." },
+    { de: "die Umwelt", en: "environment", example: "Wir müssen die Umwelt schützen." },
+    { de: "die Gelegenheit", en: "opportunity", example: "Das ist eine gute Gelegenheit." }
+  ];
+
+  const shuffle = arr => arr.slice().sort(() => Math.random() - 0.5);
+
+  const style = document.createElement("style");
+  style.id = "b1DailyChallengeStyle";
+  style.textContent = `
+    #b1DailyChallenge {
+      max-width: 950px;
+      margin: 25px auto;
+      padding: 22px;
+      background: linear-gradient(135deg,#dcfce7,#f0fdf4);
+      color: #14532d;
+      border-radius: 20px;
+      font-family: Arial,sans-serif;
+    }
+    #b1DailyChallenge .challengeCard {
+      background: white;
+      padding: 18px;
+      margin: 15px 0;
+      border-radius: 15px;
+    }
+    #b1DailyChallenge button {
+      border: none;
+      border-radius: 10px;
+      padding: 11px 15px;
+      margin: 6px 4px;
+      cursor: pointer;
+      font-weight: bold;
+      background: #15803d;
+      color: white;
+    }
+    #b1DailyChallenge .challengeOption {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: #f0fdf4;
+      color: #14532d;
+      border: 1px solid #bbf7d0;
+      margin: 8px 0;
+    }
+    #b1DailyChallenge .challengeCorrect {
+      background: #dcfce7 !important;
+      border: 2px solid #16a34a !important;
+    }
+    #b1DailyChallenge .challengeWrong {
+      background: #fee2e2 !important;
+      color: #991b1b !important;
+      border: 2px solid #ef4444 !important;
+    }
+    #b1DailyChallenge .challengeFeedback {
+      margin-top: 12px;
+      font-weight: bold;
+      line-height: 1.7;
+    }
+    #b1DailyChallenge .challengeProgress {
+      background: #dcfce7;
+      border-radius: 20px;
+      height: 16px;
+      overflow: hidden;
+    }
+    #b1DailyChallenge .challengeBar {
+      height: 100%;
+      width: 0%;
+      background: #16a34a;
+      transition: width .3s;
+    }
+    #b1DailyChallenge .challengeExample {
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 10px;
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+  `;
+  document.head.appendChild(style);
+
+  const section = document.createElement("section");
+  section.id = "b1DailyChallenge";
+
+  section.innerHTML = `
+    <h2>🧠 Daily Vocabulary Challenge</h2>
+    <p>Test your German vocabulary with 10 random questions every time you play!</p>
+
+    <div class="challengeCard">
+      <h3>🔥 Daily Streak</h3>
+      <p id="b1ChallengeStreak">0 days</p>
+      <p id="b1ChallengeLast">Complete a challenge to start your streak.</p>
+    </div>
+
+    <div class="challengeCard">
+      <div id="b1ChallengeProgressText">Question 1 of 10</div>
+      <div class="challengeProgress">
+        <div class="challengeBar" id="b1ChallengeBar"></div>
+      </div>
+      <h3 id="b1ChallengeQuestion"></h3>
+      <div id="b1ChallengeOptions"></div>
+      <div id="b1ChallengeFeedback" class="challengeFeedback"></div>
+      <div id="b1ChallengeExample" class="challengeExample" style="display:none"></div>
+      <button id="b1ChallengeNext" style="display:none">Next Question ➡️</button>
+      <button id="b1ChallengeRestart" style="display:none">🔄 Play Again</button>
+    </div>
+
+    <div class="challengeCard" id="b1ChallengeResult" style="display:none"></div>
+  `;
+
+  let quiz = [];
+  let current = 0;
+  let score = 0;
+  let answered = false;
+
+  const streakKey = "meinDeutschB1DailyChallengeStreak";
+  const lastDayKey = "meinDeutschB1DailyChallengeLastDay";
+
+  function getToday() {
+    const d = new Date();
+    return d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  }
+
+  function getYesterday() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return d.getFullYear() + "-" +
+      String(d.getMonth() + 1).padStart(2, "0") + "-" +
+      String(d.getDate()).padStart(2, "0");
+  }
+
+  function updateStreakDisplay() {
+    const streak = Number(localStorage.getItem(streakKey) || 0);
+    const lastDay = localStorage.getItem(lastDayKey);
+
+    section.querySelector("#b1ChallengeStreak").textContent =
+      "🔥 " + streak + (streak === 1 ? " day" : " days");
+
+    if (lastDay === getToday()) {
+      section.querySelector("#b1ChallengeLast").textContent =
+        "You have completed today's challenge! Keep practicing.";
+    } else {
+      section.querySelector("#b1ChallengeLast").textContent =
+        "Complete today's challenge to keep building your streak!";
+    }
+  }
+
+  function makeQuestion(word, type) {
+    const others = shuffle(words.filter(w => w.de !== word.de)).slice(0, 3);
+
+    if (type === 0) {
+      return {
+        question: "What does \"" + word.de + "\" mean?",
+        options: shuffle([word.en, ...others.map(w => w.en)]),
+        answer: word.en,
+        example: word.example,
+        word: word.de
+      };
+    }
+
+    if (type === 1) {
+      return {
+        question: "How do you say \"" + word.en + "\" in German?",
+        options: shuffle([word.de, ...others.map(w => w.de)]),
+        answer: word.de,
+        example: word.example,
+        word: word.de
+      };
+    }
+
+    if (type === 2) {
+      const article = word.de.split(" ")[0];
+      return {
+        question: "Which article belongs to \"" + word.de.replace(/^der |^die |^das /, "") + "\"?",
+        options: shuffle(["der", "die", "das"]),
+        answer: article,
+        example: word.example,
+        word: word.de
+      };
+    }
+
+    return {
+      question: "Complete the sentence:\n" + word.example.replace(word.de, "_____"),
+      options: shuffle([word.de, ...others.map(w => w.de)]),
+      answer: word.de,
+      example: word.example,
+      word: word.de
+    };
+  }
+
+  function newQuiz() {
+    const selectedWords = shuffle(words).slice(0, 10);
+    quiz = selectedWords.map((word, index) => makeQuestion(word, index % 4));
+    current = 0;
+    score = 0;
+    answered = false;
+
+    section.querySelector("#b1ChallengeResult").style.display = "none";
+    section.querySelector("#b1ChallengeRestart").style.display = "none";
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    if (current >= quiz.length) {
+      finishQuiz();
+      return;
+    }
+
+    const q = quiz[current];
+    answered = false;
+
+    section.querySelector("#b1ChallengeProgressText").textContent =
+      "Question " + (current + 1) + " of " + quiz.length;
+
+    section.querySelector("#b1ChallengeBar").style.width =
+      ((current / quiz.length) * 100) + "%";
+
+    section.querySelector("#b1ChallengeQuestion").textContent = q.question;
+    section.querySelector("#b1ChallengeFeedback").textContent = "";
+    section.querySelector("#b1ChallengeExample").style.display = "none";
+    section.querySelector("#b1ChallengeNext").style.display = "none";
+
+    const optionsContainer = section.querySelector("#b1ChallengeOptions");
+    optionsContainer.innerHTML = "";
+
+    q.options.forEach(option => {
+      const button = document.createElement("button");
+      button.className = "challengeOption";
+      button.textContent = option;
+
+      button.onclick = function () {
+        if (answered) return;
+        answered = true;
+
+        const correct = option === q.answer;
+
+        if (correct) {
+          score++;
+          button.classList.add("challengeCorrect");
+          section.querySelector("#b1ChallengeFeedback").textContent =
+            "✅ Correct! " + q.word;
+        } else {
+          button.classList.add("challengeWrong");
+          section.querySelector("#b1ChallengeFeedback").textContent =
+            "❌ Correct answer: " + q.answer;
+        }
+
+        Array.from(optionsContainer.children).forEach(btn => {
+          btn.disabled = true;
+          if (btn.textContent === q.answer) {
+            btn.classList.add("challengeCorrect");
+          }
+        });
+
+        const example = section.querySelector("#b1ChallengeExample");
+        example.style.display = "block";
+        example.innerHTML = "<strong>Example:</strong> " + q.example;
+
+        section.querySelector("#b1ChallengeNext").style.display = "inline-block";
+      };
+
+      optionsContainer.appendChild(button);
+    });
+  }
+
+  function finishQuiz() {
+    section.querySelector("#b1ChallengeProgressText").textContent =
+      "Challenge completed!";
+
+    section.querySelector("#b1ChallengeBar").style.width = "100%";
+    section.querySelector("#b1ChallengeQuestion").textContent = "🎉 Well done!";
+    section.querySelector("#b1ChallengeOptions").innerHTML = "";
+    section.querySelector("#b1ChallengeFeedback").textContent = "";
+    section.querySelector("#b1ChallengeExample").style.display = "none";
+    section.querySelector("#b1ChallengeNext").style.display = "none";
+
+    const result = section.querySelector("#b1ChallengeResult");
+    result.style.display = "block";
+
+    const percent = Math.round((score / quiz.length) * 100);
+
+    result.innerHTML = `
+      <h3>Your result: ${score} / ${quiz.length}</h3>
+      <p><strong>${percent}% correct</strong></p>
+      <p>${percent >= 80 ? "Excellent! Your German vocabulary is getting stronger! 🌟" :
+        percent >= 60 ? "Good job! Keep practicing the words you missed. 💪" :
+        "Keep learning! Repeating vocabulary will help you improve. 📚"}</p>
+    `;
+
+    const today = getToday();
+    const lastDay = localStorage.getItem(lastDayKey);
+    let streak = Number(localStorage.getItem(streakKey) || 0);
+
+    if (lastDay !== today) {
+      streak = lastDay === getYesterday() ? streak + 1 : 1;
+      localStorage.setItem(streakKey, streak);
+      localStorage.setItem(lastDayKey, today);
+    }
+
+    updateStreakDisplay();
+    section.querySelector("#b1ChallengeRestart").style.display = "inline-block";
+  }
+
+  section.querySelector("#b1ChallengeNext").onclick = function () {
+    current++;
+    renderQuestion();
+  };
+
+  section.querySelector("#b1ChallengeRestart").onclick = newQuiz;
+
+  updateStreakDisplay();
+  newQuiz();
+
+  const speaking = document.getElementById("b1SpeakingTrainer");
+  const writing = document.getElementById("b1WritingTrainer");
+  const home = document.getElementById("home");
+
+  if (speaking && speaking.parentNode) {
+    speaking.parentNode.insertBefore(section, speaking.nextSibling);
+  } else if (writing && writing.parentNode) {
+    writing.parentNode.insertBefore(section, writing.nextSibling);
+  } else if (home) {
+    home.appendChild(section);
+  } else {
+    document.body.appendChild(section);
+  }
+})();
+  /* ==========================================
+   MEIN-DEUTSCH-B1 — EXAM SIMULATOR
+========================================== */
+(function(){
+  if(document.getElementById("b1ExamSimulator")) return;
+
+  const exams = [
+    {
+      title:"Mock Exam 1 — Alltag und Beruf",
+      reading:{
+        text:"Maria arbeitet seit drei Jahren in einem Büro. Früher musste sie jeden Tag mit dem Bus fahren und brauchte fast eine Stunde zur Arbeit. Seit sechs Monaten arbeitet sie zweimal pro Woche von zu Hause. Sie findet das sehr praktisch, weil sie mehr Zeit für ihre Familie hat. An den anderen Tagen fährt sie mit dem Fahrrad ins Büro. Ihr Chef ist zufrieden, weil Maria ihre Aufgaben immer pünktlich erledigt.",
+        q:[
+          ["Wie lange arbeitet Maria schon in ihrem Büro?","Seit drei Jahren",["Seit sechs Monaten","Seit fünf Jahren"]],
+          ["Wie oft arbeitet Maria von zu Hause?","Zweimal pro Woche",["Jeden Tag","Einmal im Monat"]],
+          ["Wie fährt sie an den anderen Tagen zur Arbeit?","Mit dem Fahrrad",["Mit dem Bus","Mit dem Auto"]],
+          ["Warum findet sie Homeoffice praktisch?","Sie hat mehr Zeit für ihre Familie",["Sie verdient mehr Geld","Sie muss weniger arbeiten"]],
+          ["Wie findet ihr Chef ihre Arbeit?","Er ist zufrieden",["Er ist unzufrieden","Er kennt ihre Aufgaben nicht"]]
+        ]
+      },
+      listening:{
+        text:"Hallo Anna! Ich wollte dich fragen, ob du am Samstag mit uns wandern gehen möchtest. Wir treffen uns um neun Uhr am Bahnhof. Bitte bring etwas zu trinken und eine Regenjacke mit. Die Wettervorhersage sagt, dass es am Nachmittag vielleicht regnen wird. Wir wollen ungefähr drei Stunden wandern und danach in einem kleinen Restaurant essen. Ruf mich bitte heute Abend an.",
+        q:[
+          ["Wann treffen sich die Freunde?","Um neun Uhr",["Um zehn Uhr","Um acht Uhr"]],
+          ["Wo treffen sie sich?","Am Bahnhof",["Im Restaurant","Im Park"]],
+          ["Was soll Anna mitbringen?","Getränk und Regenjacke",["Essen und Kamera","Sportschuhe und Geld"]],
+          ["Wie lange wollen sie wandern?","Ungefähr drei Stunden",["Eine Stunde","Fünf Stunden"]]
+        ]
+      },
+      writing:"Du hast einen neuen Job angefangen. Schreibe deinem Freund/deiner Freundin eine E-Mail. Berichte über deinen neuen Arbeitsplatz, deine Kollegen und deine Aufgaben. Schreibe auch, wie dir die Arbeit gefällt.",
+      speaking:"Stell dich vor und erzähle über deine Arbeit oder Ausbildung. Wo arbeitest du? Was sind deine Aufgaben? Was gefällt dir besonders? Was möchtest du in Zukunft machen?"
+    },
+    {
+      title:"Mock Exam 2 — Gesundheit und Freizeit",
+      reading:{
+        text:"Das Gesundheitszentrum in unserer Stadt bietet ab nächsten Monat neue Kurse an. Die Kurse finden am Dienstag und Donnerstag ab 18 Uhr statt. Interessierte können Yoga, Schwimmen oder einen Tanzkurs besuchen. Die Teilnahme kostet 20 Euro im Monat. Für Studenten und ältere Menschen gibt es eine Ermäßigung. Man muss sich bis zum 25. des Monats anmelden.",
+        q:[
+          ["Wann beginnen die neuen Kurse?","Ab nächsten Monat",["Heute","In drei Monaten"]],
+          ["An welchen Tagen finden sie statt?","Dienstag und Donnerstag",["Montag und Mittwoch","Am Wochenende"]],
+          ["Welche Kurse kann man besuchen?","Yoga, Schwimmen und Tanz",["Fußball, Tennis und Kochen","Deutsch und Englisch"]],
+          ["Wie viel kostet die Teilnahme pro Monat?","20 Euro",["10 Euro","50 Euro"]],
+          ["Bis wann muss man sich anmelden?","Bis zum 25.",["Bis zum 15.","Bis zum Monatsende"]]
+        ]
+      },
+      listening:{
+        text:"Guten Tag, hier ist die Arztpraxis Dr. Müller. Ihr Termin am Mittwoch um zehn Uhr muss leider verschoben werden. Der Arzt ist an diesem Tag nicht in der Praxis. Wir können Ihnen Donnerstag um halb elf oder Freitag um vierzehn Uhr anbieten. Bitte rufen Sie uns zurück und sagen Sie uns, welcher Termin Ihnen passt. Vielen Dank.",
+        q:[
+          ["Warum wird der Termin verschoben?","Der Arzt ist nicht in der Praxis",["Der Patient ist krank","Die Praxis ist geschlossen"]],
+          ["Wann war der ursprüngliche Termin?","Mittwoch um zehn Uhr",["Donnerstag um elf Uhr","Freitag um vierzehn Uhr"]],
+          ["Welche Termine werden angeboten?","Donnerstag oder Freitag",["Montag oder Dienstag","Nur Samstag"]],
+          ["Was soll der Patient machen?","Die Praxis zurückrufen",["Eine E-Mail schreiben","Direkt ins Krankenhaus gehen"]]
+        ]
+      },
+      writing:"Du kannst am Wochenende nicht zu einer Einladung kommen. Schreibe deinem Freund/deiner Freundin eine Nachricht. Entschuldige dich, erkläre den Grund und schlage einen anderen Termin vor.",
+      speaking:"Sprich über Gesundheit und Freizeit. Was machst du, um gesund zu bleiben? Wie oft treibst du Sport? Was machst du gern am Wochenende? Warum ist Freizeit wichtig?"
+    },
+    {
+      title:"Mock Exam 3 — Reisen und Umwelt",
+      reading:{
+        text:"Die Stadtverwaltung möchte die Umwelt verbessern. Ab Januar werden die Busse häufiger fahren, besonders morgens und abends. Außerdem soll es neue Fahrradwege geben. Die Bürger können ihre Vorschläge bis Ende November online schicken. Die Stadt hofft, dass dadurch weniger Menschen mit dem Auto fahren und die Luft sauberer wird.",
+        q:[
+          ["Was möchte die Stadt verbessern?","Die Umwelt",["Die Schulen","Die Restaurants"]],
+          ["Wann fahren die Busse häufiger?","Morgens und abends",["Nur mittags","Nur am Wochenende"]],
+          ["Was soll neu gebaut werden?","Fahrradwege",["Parkplätze","Einkaufszentren"]],
+          ["Bis wann können Bürger Vorschläge schicken?","Bis Ende November",["Bis Ende Januar","Bis nächste Woche"]],
+          ["Was hofft die Stadt?","Weniger Autos und sauberere Luft",["Mehr Verkehr","Weniger Busse"]]
+        ]
+      },
+      listening:{
+        text:"Liebe Fahrgäste, unser Zug nach Köln hat heute ungefähr zwanzig Minuten Verspätung. Der Zug fährt nicht von Gleis drei, sondern von Gleis fünf. Bitte beachten Sie die Änderungen. Fahrgäste, die nach Bonn fahren möchten, können den Zug um zwölf Uhr fünfzehn nehmen. Wir entschuldigen uns für die Unannehmlichkeiten.",
+        q:[
+          ["Wie viel Verspätung hat der Zug?","Ungefähr zwanzig Minuten",["Zehn Minuten","Eine Stunde"]],
+          ["Von welchem Gleis fährt der Zug?","Gleis fünf",["Gleis drei","Gleis sieben"]],
+          ["Wohin fährt der Zug?","Nach Köln",["Nach Bonn","Nach Berlin"]],
+          ["Wann können Fahrgäste nach Bonn fahren?","Um 12:15",["Um 12:00","Um 13:15"]]
+        ]
+      },
+      writing:"Du hast eine Reise gemacht. Schreibe einem Freund/einer Freundin eine E-Mail. Berichte, wohin du gefahren bist, wie du gereist bist, was du dort gemacht hast und ob dir die Reise gefallen hat.",
+      speaking:"Plane mit deinem Partner/deiner Partnerin einen Wochenendausflug. Sprecht über das Reiseziel, die Verkehrsmittel, die Kosten, die Aktivitäten und die Uhrzeit."
+    }
+  ];
+
+  let examIndex=0;
+  let answers={};
+  let timeLeft=60*60;
+  let timer=null;
+  let started=false;
+
+  const root=document.createElement("div");
+  root.id="b1ExamSimulator";
+
+  root.innerHTML=`
+  <style>
+    #b1ExamSimulator{
+      font-family:Arial,sans-serif;
+      margin:22px auto;
+      max-width:900px;
+      color:inherit;
+    }
+    #b1ExamSimulator .sim-card{
+      border:1px solid #64748b;
+      border-radius:16px;
+      padding:18px;
+      margin:12px 0;
+      background:rgba(128,128,128,.06);
+    }
+    #b1ExamSimulator .sim-title{
+      font-size:23px;font-weight:bold;margin-bottom:10px;
+    }
+    #b1ExamSimulator button{
+      border:0;border-radius:9px;padding:11px 16px;
+      margin:5px;cursor:pointer;font-weight:bold;
+      background:#2563eb;color:white;
+    }
+    #b1ExamSimulator button.secondary{background:#64748b}
+    #b1ExamSimulator .sim-option{
+      display:block;width:100%;text-align:left;
+      margin:7px 0;background:rgba(128,128,128,.12);
+      color:inherit;border:1px solid #94a3b8;
+    }
+    #b1ExamSimulator .sim-option.selected{
+      background:#2563eb;color:white;
+    }
+    #b1ExamSimulator textarea{
+      width:100%;min-height:180px;padding:12px;
+      box-sizing:border-box;border-radius:10px;
+      font-size:16px;margin-top:10px;
+    }
+    #b1ExamSimulator .sim-timer{
+      font-size:28px;font-weight:bold;color:#dc2626;
+      text-align:center;padding:12px;
+    }
+    #b1ExamSimulator .sim-question{margin:16px 0;}
+    #b1ExamSimulator .sim-muted{opacity:.8;}
+    #b1ExamSimulator .sim-score{
+      font-size:26px;font-weight:bold;text-align:center;
+      padding:15px;
+    }
+  </style>
+
+  <div class="sim-card">
+    <div class="sim-title">🏆 B1 Prüfungssimulator</div>
+    <p>Practice a complete B1-style exam. Read carefully, listen, write and speak.</p>
+    <div id="simExamTitle"></div>
+    <div class="sim-timer" id="simTimer">60:00</div>
+    <div id="simIntro">
+      <p><b>Exam sections:</b></p>
+      <ul>
+        <li>Lesen — 5 questions</li>
+        <li>Hören — 4 questions</li>
+        <li>Schreiben — 1 writing task</li>
+        <li>Sprechen — 1 speaking task</li>
+      </ul>
+      <p>Reading and listening are automatically scored. Writing and speaking are evaluated by you.</p>
+      <button id="simStart">Start Exam</button>
+    </div>
+    <div id="simContent"></div>
+    <div id="simResult"></div>
+  </div>`;
+
+  const style=document.createElement("style");
+  style.id="b1ExamSimulatorStyle";
+  document.head.appendChild(style);
+  document.body.appendChild(root);
+
+  const $=id=>root.querySelector("#"+id);
+  const today=()=>new Date().toISOString().slice(0,10);
+
+  function renderIntro(){
+    $("simExamTitle").textContent=exams[examIndex].title;
+  }
+  renderIntro();
+
+  function startExam(){
+    started=true;
+    answers={};
+    timeLeft=60*60;
+    $("simIntro").style.display="none";
+    $("simResult").innerHTML="";
+    renderExam();
+    updateTimer();
+    timer=setInterval(()=>{
+      timeLeft--;
+      updateTimer();
+      if(timeLeft<=0) finishExam();
+    },1000);
+  }
+
+  function updateTimer(){
+    const m=Math.floor(timeLeft/60);
+    const s=timeLeft%60;
+    $("simTimer").textContent=
+      String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  }
+
+  function renderExam(){
+    const e=exams[examIndex];
+    const content=$("simContent");
+    content.innerHTML="";
+
+    const reading=document.createElement("div");
+    reading.className="sim-card";
+    reading.innerHTML=`<h2>📖 Lesen</h2><p>${e.reading.text}</p>`;
+    addQuestions(reading,e.reading.q,"reading");
+    content.appendChild(reading);
+
+    const listening=document.createElement("div");
+    listening.className="sim-card";
+    listening.innerHTML=`
+      <h2>🎧 Hören</h2>
+      <p>Listen to the text. You can replay it as many times as you need.</p>
+      <button id="simPlayAudio">▶️ Play Audio</button>
+      <button class="secondary" id="simStopAudio">■ Stop Audio</button>`;
+    addQuestions(listening,e.listening.q,"listening");
+    content.appendChild(listening);
+
+    listening.querySelector("#simPlayAudio").onclick=()=>{
+      if(!("speechSynthesis" in window)){
+        alert("Audio is not supported by this browser.");
+        return;
+      }
+      speechSynthesis.cancel();
+      const utterance=new SpeechSynthesisUtterance(e.listening.text);
+      utterance.lang="de-DE";
+      utter.rate=.85;
+      speechSynthesis.speak(utterance);
+    };
+    listening.querySelector("#simStopAudio").onclick=()=>{
+      speechSynthesis.cancel();
+    };
+
+    const writing=document.createElement("div");
+    writing.className="sim-card";
+    writing.innerHTML=`
+      <h2>✍️ Schreiben</h2>
+      <p>${e.writing}</p>
+      <p class="sim-muted">Write your answer in German. Aim for approximately 80–120 words.</p>
+      <textarea id="simWriting" placeholder="Schreibe hier deine Antwort..."></textarea>
+      <div id="simWordCount">Words: 0</div>`;
+    content.appendChild(writing);
+    writing.querySelector("#simWriting").oninput=ev=>{
+      const count=ev.target.value.trim()?ev.target.value.trim().split(/\s+/).length:0;
+      writing.querySelector("#simWordCount").textContent="Words: "+count;
+    };
+
+    const speaking=document.createElement("div");
+    speaking.className="sim-card";
+    speaking.innerHTML=`
+      <h2>🗣️ Sprechen</h2>
+      <p>${e.speaking}</p>
+      <p>Take a few minutes to prepare, then speak aloud in German.</p>
+      <button id="simSpeakTimer">⏱ 2-Minute Speaking Timer</button>
+      <div id="simSpeakClock"></div>
+      <textarea id="simSpeakNotes" placeholder="Optional: write a few notes before speaking..."></textarea>`;
+    content.appendChild(speaking);
+
+    let speakTime=120,speakInterval=null;
+    speaking.querySelector("#simSpeakTimer").onclick=()=>{
+      if(speakInterval){
+        clearInterval(speakInterval);
+        speakInterval=null;
+        return;
+      }
+      speakTime=120;
+      speaking.querySelector("#simSpeakClock").textContent="02:00";
+      speakInterval=setInterval(()=>{
+        speakTime--;
+        const mm=Math.floor(speakTime/60);
+        const ss=speakTime%60;
+        speaking.querySelector("#simSpeakClock").textContent=
+          String(mm).padStart(2,"0")+":"+String(ss).padStart(2,"0");
+        if(speakTime<=0){
+          clearInterval(speakInterval);
+          speakInterval=null;
+          alert("Speaking time is finished!");
+        }
+      },1000);
+    };
+
+    const finish=document.createElement("button");
+    finish.textContent="Finish Exam & See Results";
+    finish.onclick=finishExam;
+    content.appendChild(finish);
+  }
+
+  function addQuestions(container,questions,section){
+    questions.forEach((q,i)=>{
+      const key=section+"_"+i;
+      const div=document.createElement("div");
+      div.className="sim-question";
+      div.innerHTML=`<b>${i+1}. ${q[0]}</b>`;
+      const opts=[q[1],...q[2]].sort(()=>Math.random()-.5);
+      opts.forEach(opt=>{
+        const btn=document.createElement("button");
+        btn.className="sim-option";
+        btn.textContent=opt;
+        btn.onclick=()=>{
+          answers[key]=opt;
+          div.querySelectorAll("button").forEach(b=>b.classList.remove("selected"));
+          btn.classList.add("selected");
+        };
+        div.appendChild(btn);
+      });
+      container.appendChild(div);
+    });
+  }
+
+  function finishExam(){
+    if(!started)return;
+    started=false;
+    clearInterval(timer);
+    timer=null;
+    if("speechSynthesis" in window)speechSynthesis.cancel();
+
+    const e=exams[examIndex];
+    const total=e.reading.q.length+e.listening.q.length;
+    let correct=0;
+    let readingCorrect=0;
+    let listeningCorrect=0;
+
+    e.reading.q.forEach((q,i)=>{
+      if(answers["reading_"+i]===q[1]){
+        correct++;readingCorrect++;
+      }
+    });
+    e.listening.q.forEach((q,i)=>{
+      if(answers["listening_"+i]===q[1]){
+        correct++;listeningCorrect++;
+      }
+    });
+
+    const percent=Math.round(correct/total*100);
+    const writingText=$("simContent").querySelector("#simWriting")?.value||"";
+    const speakingNotes=$("simContent").querySelector("#simSpeakNotes")?.value||"";
+
+    const record={
+      exam:e.title,
+      date:today(),
+      score:percent,
+      correct,
+      total,
+      reading:readingCorrect,
+      listening:listeningCorrect,
+      writingWords:writingText.trim()?writingText.trim().split(/\s+/).length:0
+    };
+
+    let history=JSON.parse(localStorage.getItem("meinDeutschB1ExamHistory")||"[]");
+    history.push(record);
+    localStorage.setItem("meinDeutschB1ExamHistory",JSON.stringify(history));
+
+    $("simContent").innerHTML="";
+    $("simResult").innerHTML=`
+      <div class="sim-card">
+        <div class="sim-title">🏁 Exam Completed!</div>
+        <div class="sim-score">${percent}%</div>
+        <p style="text-align:center">Reading: ${readingCorrect}/${e.reading.q.length}</p>
+        <p style="text-align:center">Listening: ${listeningCorrect}/${e.listening.q.length}</p>
+        <p style="text-align:center">${percent>=60?"Good job! Keep practicing your German!":"Keep practicing! Review your mistakes and try again."}</p>
+        <hr>
+        <h3>Writing Review</h3>
+        <p>Words written: ${record.writingWords}</p>
+        <p>Did you answer all points? Did you use correct grammar? Did you write a greeting and closing?</p>
+        <h3>Speaking Review</h3>
+        <p>Did you speak for approximately 2 minutes? Did you answer all parts? Was your pronunciation clear?</p>
+        <p>Your exam result has been saved on this device.</p>
+        <button id="simNextExam">Try Another Exam</button>
+        <button class="secondary" id="simRestart">Repeat This Exam</button>
+        <button class="secondary" id="simHistory">View Exam History</button>
+      </div>`;
+
+    $("simNextExam").onclick=()=>{
+      examIndex=(examIndex+1)%exams.length;
+      resetSimulator();
+    };
+    $("simRestart").onclick=resetSimulator;
+    $("simHistory").onclick=showHistory;
+  }
+
+  function resetSimulator(){
+    answers={};
+    started=false;
+    timeLeft=60*60;
+    $("simResult").innerHTML="";
+    $("simContent").innerHTML="";
+    $("simIntro").style.display="block";
+    updateTimer();
+    renderIntro();
+  }
+
+  function showHistory(){
+    const history=JSON.parse(localStorage.getItem("meinDeutschB1ExamHistory")||"[]");
+    if(!history.length){
+      alert("No exam results saved yet.");
+      return;
+    }
+    let message="YOUR EXAM HISTORY\n\n";
+    history.slice(-10).reverse().forEach((r,i)=>{
+      message+=`${i+1}. ${r.exam}\nDate: ${r.date}\nScore: ${r.score}% (${r.correct}/${r.total})\n\n`;
+    });
+    alert(message);
+  }
+
+  $("simStart").onclick=startExam;
+})();
 </script>
 
 </body>
