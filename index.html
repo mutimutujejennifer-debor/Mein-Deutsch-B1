@@ -1256,6 +1256,240 @@ function showProgress() {
     const button = event.target.closest("[data-open]");
     if (button) openExam(Number(button.dataset.open));
   });
+  /* MEIN-DEUTSCH-B1 - PROGRESS TRACKER */
+(function () {
+  if (document.getElementById("b1ProgressTracker")) return;
+
+  const STORAGE_KEY = "meinDeutschB1Progress_v1";
+
+  let progress = {};
+  try {
+    progress = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  } catch (e) {
+    progress = {};
+  }
+
+  const section = document.createElement("section");
+  section.id = "b1ProgressTracker";
+
+  const style = document.createElement("style");
+  style.textContent = `
+    #b1ProgressTracker {
+      margin: 25px 0;
+      padding: 20px;
+      border-radius: 16px;
+      background: #eef4ff;
+      color: #1b2b45;
+    }
+    #b1ProgressTracker .progress-box {
+      background: white;
+      padding: 18px;
+      margin: 14px 0;
+      border-radius: 12px;
+    }
+    #b1ProgressTracker .progress-bar {
+      height: 18px;
+      background: #dce5f3;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    #b1ProgressTracker .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #3975d7;
+      transition: width .3s;
+    }
+    #b1ProgressTracker .exam-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    #b1ProgressTracker input[type="checkbox"] {
+      transform: scale(1.2);
+    }
+    #b1ProgressTracker input[type="number"] {
+      width: 75px;
+      padding: 7px;
+      border: 1px solid #ccd5e2;
+      border-radius: 6px;
+    }
+    #b1ProgressTracker button {
+      padding: 9px 14px;
+      border: none;
+      border-radius: 8px;
+      background: #285db5;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #b1ProgressTracker .reset-btn {
+      background: #a63838;
+    }
+  `;
+  document.head.appendChild(style);
+
+  section.innerHTML = `
+    <h2>📊 Mein Lernfortschritt</h2>
+    <p>Track your Goethe B1 exam practice and keep track of your results.</p>
+
+    <div class="progress-box">
+      <h3>🏆 Overall Exam Progress</h3>
+      <div id="b1ProgressText">0 of 15 exams completed</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="b1ProgressFill"></div>
+      </div>
+      <strong id="b1ProgressPercent">0%</strong>
+    </div>
+
+    <div class="progress-box">
+      <h3>📝 Goethe B1 Practice Exams</h3>
+      <div id="b1ExamList"></div>
+    </div>
+
+    <div class="progress-box">
+      <h3>⭐ My Average Score</h3>
+      <p id="b1AverageScore">No scores recorded yet.</p>
+    </div>
+
+    <button id="b1SaveProgress">💾 Save My Progress</button>
+    <button id="b1ResetProgress" class="reset-btn">Reset Progress</button>
+    <p id="b1SaveMessage"></p>
+  `;
+
+  const examNames = [
+    "Prüfung 1 – Alltag und Freizeit",
+    "Prüfung 2 – Gesundheit und Ernährung",
+    "Prüfung 3 – Arbeit und Beruf",
+    "Prüfung 4 – Reisen und Umwelt",
+    "Prüfung 5 – Bildung und Medien",
+    "Prüfung 6 – Wohnen und Nachbarschaft",
+    "Prüfung 7 – Einkaufen und Dienstleistungen",
+    "Prüfung 8 – Familie und Beziehungen",
+    "Prüfung 9 – Kultur und Gesellschaft",
+    "Prüfung 10 – Zukunft und Technologie",
+    "Prüfung 11 – Kommunikation und Alltag",
+    "Prüfung 12 – Natur und Klima",
+    "Prüfung 13 – Gesundheit und Sport",
+    "Prüfung 14 – Beruf und Karriere",
+    "Prüfung 15 – Reisen und internationale Beziehungen"
+  ];
+
+  const examList = section.querySelector("#b1ExamList");
+
+  examNames.forEach((name, index) => {
+    const id = "exam" + (index + 1);
+    const row = document.createElement("div");
+    row.className = "exam-row";
+
+    row.innerHTML = `
+      <label>
+        <input type="checkbox" class="exam-check" data-id="${id}">
+        ${name}
+      </label>
+      <span>Score:</span>
+      <input type="number" class="exam-score" data-id="${id}"
+        min="0" max="100" placeholder="0–100">
+      <span>/100</span>
+    `;
+
+    examList.appendChild(row);
+  });
+
+  function saveData() {
+    const checks = section.querySelectorAll(".exam-check");
+    const scores = section.querySelectorAll(".exam-score");
+
+    checks.forEach(check => {
+      progress[check.dataset.id] = progress[check.dataset.id] || {};
+      progress[check.dataset.id].completed = check.checked;
+    });
+
+    scores.forEach(input => {
+      progress[input.dataset.id] = progress[input.dataset.id] || {};
+      progress[input.dataset.id].score =
+        input.value === "" ? "" : Number(input.value);
+    });
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    updateDisplay();
+  }
+
+  function updateDisplay() {
+    const checks = section.querySelectorAll(".exam-check");
+    let completed = 0;
+    let totalScore = 0;
+    let scoreCount = 0;
+
+    checks.forEach(check => {
+      const id = check.dataset.id;
+      check.checked = !!progress[id]?.completed;
+
+      if (check.checked) completed++;
+
+      const scoreInput = section.querySelector(
+        `.exam-score[data-id="${id}"]`
+      );
+
+      if (scoreInput) {
+        scoreInput.value = progress[id]?.score ?? "";
+
+        if (scoreInput.value !== "") {
+          totalScore += Number(scoreInput.value);
+          scoreCount++;
+        }
+      }
+    });
+
+    const percent = Math.round((completed / 15) * 100);
+
+    section.querySelector("#b1ProgressText").textContent =
+      `${completed} of 15 exams completed`;
+
+    section.querySelector("#b1ProgressFill").style.width =
+      percent + "%";
+
+    section.querySelector("#b1ProgressPercent").textContent =
+      percent + "%";
+
+    section.querySelector("#b1AverageScore").textContent =
+      scoreCount
+        ? `${Math.round(totalScore / scoreCount)}% average from ${scoreCount} recorded scores`
+        : "No scores recorded yet.";
+  }
+
+  section.querySelector("#b1SaveProgress").onclick = () => {
+    saveData();
+    section.querySelector("#b1SaveMessage").textContent =
+      "✅ Progress saved successfully!";
+  };
+
+  section.querySelector("#b1ResetProgress").onclick = () => {
+    if (confirm("Are you sure you want to reset all your exam progress and scores?")) {
+      progress = {};
+      localStorage.removeItem(STORAGE_KEY);
+      updateDisplay();
+      section.querySelector("#b1SaveMessage").textContent =
+        "Progress has been reset.";
+    }
+  };
+
+  const previous =
+    document.getElementById("goetheGroup3") ||
+    document.getElementById("goetheGroup2") ||
+    document.getElementById("goethePruefung");
+
+  if (previous && previous.parentNode) {
+    previous.parentNode.insertBefore(section, previous.nextSibling);
+  } else {
+    (document.getElementById("home") || document.body).appendChild(section);
+  }
+
+  updateDisplay();
+})();
 })();
 </script>
 
